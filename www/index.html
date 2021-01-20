@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+ <head>
+   <meta charset="utf-8">
+    <script src="https://connect.facebook.net/en_US/sdk.js"></script>
+    <script src="js/canvasFill.js"></script>
+   <h1>Simple Test webRTC Streaming to IVS</h1>>
+   <script>
+
+     document.addEventListener('DOMContentLoaded', () => {
+       document.querySelector('[data-action="goLive"]').addEventListener('click', (e) => {
+        var baseurl = document.formulario.ivsurl.value;
+        var streamkey = document.formulario.key.value;
+        
+        var createRes = {};
+         createRes.mediaRecorder;
+         createRes.mediaStream;
+         createRes.stream_url = baseurl + streamkey
+
+
+
+          
+
+           const ws = new WebSocket(
+             window.location.protocol.replace('http', 'ws') + '//' + // http: => ws:, https: -> wss:
+             window.location.host +
+             '/rtmps/' +
+             encodeURIComponent(createRes.stream_url)
+           );
+
+           ws.addEventListener('open', (e) => {
+            console.log('test', document.formulario.ivsurl.value);
+             console.log('WebSocket Open', e);
+             mediaStream = document.querySelector('canvas').captureStream(30); // 30 FPS
+             mediaRecorder = new MediaRecorder(mediaStream, {
+               mimeType: 'video/webm;codecs=h264',
+               videoBitsPerSecond : 3000000
+             });
+
+             mediaRecorder.addEventListener('dataavailable', (e) => {
+               ws.send(e.data);
+             });
+
+             mediaRecorder.addEventListener('stop', ws.close.bind(ws));
+
+             mediaRecorder.start(1000); // Start recording, and dump data every second
+
+
+           });
+
+           ws.addEventListener('close', (e) => {
+             console.log('WebSocket Close', e);
+             mediaRecorder.stop();
+           });
+
+         });
+       });
+   
+   </script>
+ </head>
+ <body>
+  <canvas width="640" height="360"></canvas>
+  
+    <nav>
+    <form name="formulario">
+      <input type="text" placeholder="add ivs ulr" id="ivsurl" name="ivsurl">
+      <input type="text" placeholder="stream key" id="key" name="key">
+      <button type="button" data-action="goLive">Go Live</button>
+    </form>
+   </nav>
+
+ </body>
+</html>
