@@ -2,6 +2,9 @@
 
 # dependencies
 /node_modules
+/amplify
+/www/node_modules
+/www/amplify
 /.pnp
 .pnp.js
 

@@ -7,7 +7,7 @@ const http = require('http');
 const WebSocketServer = require('ws').Server;
 
 const app = express();
-const port = 3003
+const port = 3004
 const server = http.createServer(app).listen(port, () => {
   console.log('Listening on port...',port);
 });
