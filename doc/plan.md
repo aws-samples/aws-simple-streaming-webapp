@@ -25,7 +25,8 @@ WebRTC to RTMP
 - [ ] treat player error and keep trying
 - [ ] use video and audio selected
 - [ ] simplify player or externalize
-- [ ] device selector
+- [X] device selector
+- [ ] audio out
 - [ ] stop all sources 
 
 ### Server Side RTMP Relay
