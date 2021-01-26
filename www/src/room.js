@@ -11,6 +11,8 @@ import Table from 'react-bootstrap/Table';
 Amplify.configure(awsmobile);
 
 
+
+
 class room extends Component {
   constructor(props) {
     super(props);
@@ -41,10 +43,13 @@ class room extends Component {
       loaded: 0,
       duration: 0,
       playbackRate: 1.0,
+      vDevID: 'video', //replace with def 
+      aDevID: document.querySelector("select#audioSource"),
       CAMERA_CONSTRAINTS: {
         audio: true,
         video: true
       },
+      //constraints: { audio: true, video: { width: 1280, height: 720 }},
       rtmpURL: "rtmps://ca538d4d3d92.global-contribute.live-video.net:443/app/",
       streamKey: "sk_us-east-1_gecbHp7v8OJg_FN7Uxsqxud0186yUUCnhqcy4PaxTsR",
       playURL: "https://ca538d4d3d92.us-east-1.playback.live-video.net/api/video/v1/us-east-1.904149973046.channel.5xGI6F0YnnSe.m3u8",
@@ -63,6 +68,7 @@ class room extends Component {
     .then(stream => this.videoRef.current.srcObject = stream)
     .catch(console.log);
     this.getCurrentUser()
+    this.start()
     this.checkStreamig()
     //console.log("Did Mount")
   }
@@ -79,7 +85,44 @@ getCurrentUser() {
   });
 };
 
+// disable all cams // still bug
+start() {
+  console.log("print active cams", window)
+  if (window.stream) {
+    window.stream.getTracks().forEach(track => {
+      track.stop();
+    });
+  }
+}
 
+handleDevChange = event => {
+  /// if audio if video 
+  event.preventDefault();
+  console.log("Device Change block")
+  console.log(event.target.value)
+  console.log(event.target.id)
+  if (event.target.id === 'videoin'){
+    console.log("set video", event.target.value)
+    this.setState({vDevID: event.target.value}, () => {
+      this.enableCam()
+      console.log(this.state.vDevID)
+    });
+    //let vDevID = event.target.value
+  }
+  if (event.target.id === 'audioin'){
+    console.log("set audio iN")
+    this.setState({aDevID: event.target.value}, () => {
+      this.enableCam()
+      console.log(this.state.aDevID)
+    });
+  }
+  if (event.target.id === 'audioout'){
+    console.log("set audio out")
+  }
+  console.log("check this.state", this.state)
+  
+}
+// this handle device change 
 
 
 listCam = async () => {
@@ -93,9 +136,9 @@ listCam = async () => {
   let camlist = []
   await navigator.mediaDevices.enumerateDevices()
     .then(gotDevices => {
-      console.log("list devices", gotDevices);
+      //console.log("list devices", gotDevices);
 
-      gotDevices.forEach(logArrayElements);
+      //gotDevices.forEach(logArrayElements);
 
       gotDevices.forEach(function(gotDevice) {
 
@@ -104,16 +147,17 @@ listCam = async () => {
         //console.log(gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
         //devId = gotDevice.deviceId
         if (gotDevice.kind === 'videoinput'){
-          console.log("video", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
-          videoin.push(gotDevice.label)
+          //console.log("video", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
+          videoin.push({label: gotDevice.label, id: gotDevice.deviceId})
+          console.log("como esta video in!!!!!!", videoin)
         }
         if (gotDevice.kind === 'audioinput'){
-          console.log("audioin", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
-          audioin.push(gotDevice.label)
+          //console.log("audioin", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
+          audioin.push({label: gotDevice.label, id: gotDevice.deviceId})
         }
         if (gotDevice.kind === 'audiooutput'){
-          console.log("audioout", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
-          audioout.push(gotDevice.label)
+          //console.log("audioout", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
+          audioout.push({label: gotDevice.label, id: gotDevice.deviceId})
         }
       });
       
@@ -135,13 +179,19 @@ listCam = async () => {
 
 
 enableCam () {
+  const {vDevID, aDevID} = this.state
   console.log("Loop enable cam")
-  var constraints = { audio: true, video: { width: 1280, height: 720 } };
+  console.log(vDevID, aDevID)
+  //const {vDevID} = this.state
+  console.log("video ID", this.state.vDevID)
+  var constraints = { audio: {enabled: true, deviceId: aDevID}, video: { width: 1280, height: 720, deviceId: this.state.vDevID } };
+  console.log("contrainsts", constraints)
   var stream = this.state
     navigator.mediaDevices
       .getUserMedia(constraints)
       .then(function(mediaStream) {
         var stream = document.querySelector("video");
+        console.log("doc query selector", stream, constraints)
 
         stream.srcObject = mediaStream;
         stream.onloadedmetadata = function(e) {
@@ -166,12 +216,9 @@ handlePlayPause = () => {
   this.setState({ playing: !this.state.playing })
 }
 
-
 handleStop = () => {
   this.setState({ url: null, playing: false })
 }
-
-
 
 handleStart = () => {
   console.log("state", this.state.StartTime, this.state.playedSeconds);
@@ -271,9 +318,6 @@ handleSeekChange = e => {
   //console.log("Change", e.target.value);
 }
 
-
-
-
 handleSeekMouseUp = e => {
   //e.preventDefault();
   this.setState({ seeking: false })
@@ -299,12 +343,9 @@ handleDuration = (duration) => {
   this.setState({ duration })
 }
 
-/// Player Controls END
+/// Player Controls END ==> external module
 
 
-handleDevChange = (e) =>{
-  console.log(e);
-}
 
 playChannel = (e) => {
   e.preventDefault();
@@ -333,7 +374,6 @@ stopStreaming = () => {
   }
   this.setState({isStreaming: false, isConnected: false, showPlayer: false});
 };
-
 
 startStreaming = (e) =>{
   e.preventDefault();
@@ -369,7 +409,7 @@ startStreaming = (e) =>{
   let audioStream = new MediaStream();
 
   console.log ("procurando audio tracking", this.state.stream.current)
-
+  console.log ("procurando audio tracking", this.state.stream.current)
   // to sem audio // to be fixed 
   /*
   let audioTracks = this.state.stream.current.getAudioTracks();
@@ -400,9 +440,6 @@ startStreaming = (e) =>{
 
   //this.playerShow()
 } 
-
-
-
   render() {
     console.log("reder has been called");
     console.log(this.state);
@@ -410,7 +447,6 @@ startStreaming = (e) =>{
     const { token, showCam, videoin, audioin, audioout, stream, isConnected, isStreaming, playURL} = this.state;
     //Player Const
     const {showPlayer, pip, playing, controls, light, loop, playbackRate, volume, muted} = this.state;
-    console.log("tem token?", token)
     const { rtmpURL, streamKey }  = this.state;
     if (!showCam) {
       console.log("loadding");
@@ -426,7 +462,7 @@ startStreaming = (e) =>{
       )
     } else{
       console.log("ShowCam", showCam);
-      console.log("Tem cameras?", videoin)
+      console.log("Tem cameras?", videoin.label)
       return (
         
         <div className="App">
@@ -437,20 +473,20 @@ startStreaming = (e) =>{
                 <div className="row">
                 <div className="col-md">
                   <form onSubmit={this.handleSubmit} class="form-control-select">
-                      <select class="form-control" value={this.state.value} onChange={this.handleDevChange} >
+                      <select id="videoin" class="form-control" value={this.state.value} onChange={this.handleDevChange} >
                       <option disabled>Select Camera</option>
                       {videoin.map((videoin) =>
-                        <option key={videoin} value={videoin}>{videoin}</option>)}
+                        <option key={videoin.id} value={videoin.id}>{videoin.label}</option>)}
                       </select>
-                      <select class="form-control" value={this.state.value} onChange={this.handleDevChange}>
+                      <select id="audioin" class="form-control" value={this.state.value} onChange={this.handleDevChange}>
                       <option disabled>Select Audio In</option>
                       {audioin.map((audioin) =>
-                        <option key={audioin} value={audioin}>{audioin}</option>)}
+                        <option key={audioin.id} value={audioin.id}>{audioin.label}</option>)}
                       </select>
-                      <select class="form-control" value={this.state.value} onChange={this.handleDevChange}>
+                      <select id="audioout" class="form-control" value={this.state.value} onChange={this.handleDevChange}>
                       <option disabled>Select Audio Out</option>
                       {audioout.map((audioout) =>
-                        <option key={audioout} value={audioout}>{audioout}</option>)}
+                        <option key={audioout.id} value={audioout.id}>{audioout.label}</option>)}
                       </select>
                     </form>
                 </div>
