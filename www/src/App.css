@@ -44,6 +44,32 @@
   box-sizing: border-box;
 }
 
+.EnCamBOX{
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center; 
+  margin: 20px;
+  background: #FF9900;
+  width: 550px;
+  height: 130px;
+  padding: 20px;
+}
+
+.textForm{
+  color: white;
+  font-size: 20px;
+}
+
+.form-Player{
+  display: flex; 
+  justify-content: left;
+  align-items: top;
+  width: 100%;
+  padding: 30px 100px;
+  margin: 18px 0;
+  box-sizing: border-box;
+}
+
 .form-control{
   width: 100%;
   box-sizing: border-box;
@@ -85,6 +111,28 @@
   border-radius: 8px;
 }
 
+.formBotStop{
+  display: flex;
+  background-color:	#ff0011;
+  border: none;
+  color: white;
+  padding: 8px 70px 10px;
+  margin: 9px;
+  display: inline-block;
+  font-size: 18px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.formatText{
+  color: white;
+  font-size: 18px;
+}
+
+.playerBOX{
+  padding: 30px 0px 0px;
+}
+
 .webcamBOX{
   display: flex; 
   width: 854px;
@@ -97,7 +145,7 @@
 
 
 .enableCam{
-  background-color: #008CBA; /* Blue */
+  background-color: #232F3E; /* Blue */
   border: none;
   color: white;
   padding: 15px 32px;

@@ -9,9 +9,9 @@ import Room from './room';
 import RoomAdmin from './roomadm';
 import Amplify from 'aws-amplify';
 import { withAuthenticator } from '@aws-amplify/ui-react'
-//import awsmobile from './aws-exports';
+import awsmobile from './aws-exports';
 
-//Amplify.configure(awsmobile);
+Amplify.configure(awsmobile);
 
 class App extends Component {
   render() {
@@ -45,4 +45,4 @@ class App extends Component {
     );
   }
 }
-export default (App);
+export default withAuthenticator(App);

@@ -5,6 +5,7 @@ import React, { Component, useEffect, useState, useRef  } from 'react';
 //import VideoPlayer from './player';
 import Amplify, { Auth } from 'aws-amplify';
 import awsmobile from "./aws-exports";
+import ReactPlayer from 'react-player'
 import Table from 'react-bootstrap/Table';
 
 Amplify.configure(awsmobile);
@@ -21,7 +22,9 @@ class room extends Component {
       copyItems: [],
       audioin: [],
       audioout:[],
-      isConnected:false,
+      isConnected: false,
+      isStreaming: false,
+      showPlayer: false,
       showCam: false,
       nameCanv: React.createRef(),
       wsRef: React.createRef(),
@@ -29,12 +32,22 @@ class room extends Component {
       requestAnimationRef: React.createRef(),
       videoRef: React.createRef(),
       setCameraEnabled: false,
+      playing: true,
+      controls: true,
+      light: false,
+      volume: 0.8,
+      muted: false,
+      played: 0,
+      loaded: 0,
+      duration: 0,
+      playbackRate: 1.0,
       CAMERA_CONSTRAINTS: {
         audio: true,
         video: true
       },
       rtmpURL: "rtmps://ca538d4d3d92.global-contribute.live-video.net:443/app/",
       streamKey: "sk_us-east-1_gecbHp7v8OJg_FN7Uxsqxud0186yUUCnhqcy4PaxTsR",
+      playURL: "https://ca538d4d3d92.us-east-1.playback.live-video.net/api/video/v1/us-east-1.904149973046.channel.5xGI6F0YnnSe.m3u8",
       showComponent: true,
     };
     //this.handleURLset = this.handleURLset.bind(this);
@@ -50,6 +63,7 @@ class room extends Component {
     .then(stream => this.videoRef.current.srcObject = stream)
     .catch(console.log);
     this.getCurrentUser()
+    this.checkStreamig()
     //console.log("Did Mount")
   }
 
@@ -145,12 +159,183 @@ enableCam () {
   
 };
 
+//Player Controls
+
+
+handlePlayPause = () => {
+  this.setState({ playing: !this.state.playing })
+}
+
+
+handleStop = () => {
+  this.setState({ url: null, playing: false })
+}
+
+
+
+handleStart = () => {
+  console.log("state", this.state.StartTime, this.state.playedSeconds);
+  console.log("trunc",  Math.floor(this.state.playedSeconds));
+  console.log ("remaining", Math.floor(this.state.duration * (1 - this.state.played)));
+  //let playedsectrunc = Math.floor(this.state.playedSeconds)
+  let remaining = Math.floor(this.state.duration * (1 - this.state.played))
+  this.setState({ 
+    playing: true,
+    //Total: Number(this.state.StartTime) + Number(playedsectrunc), //for VOD
+    StartTime: Math.floor(Date.now()/1000) - Number(remaining)
+    
+  },
+  this.sendStateToParent);
+  console.log ("vamo ver!", this.state.StartTime);
+}
+
+handleEnd = () => {
+  //let playedsecend = Math.floor(this.state.playedSeconds)
+  console.log ("remaining", Math.floor(this.state.duration * (1 - this.state.played)));
+  //let playedsectrunc = Math.floor(this.state.playedSeconds)
+  let remaining = Math.floor(this.state.duration * (1 - this.state.played))
+  //this.setState({ url: null, playing: false })
+  this.setState({ 
+    //playing: false,
+    //TotalEnd: Number(this.state.StartTime) + Number(playedsecend),
+    EndTime: Math.floor(Date.now()/1000) - Number(remaining),
+    showComponentdois: true
+  })
+}
+
+handleToggleControls = () => {
+  const url = this.state.url
+  this.setState({
+    controls: !this.state.controls,
+    url: null
+  }, () => this.load(url))
+}
+
+handleToggleLight = () => {
+  this.setState({ light: !this.state.light })
+}
+
+handleToggleLoop = () => {
+  this.setState({ loop: !this.state.loop })
+}
+
+handleVolumeChange = e => {
+  this.setState({ volume: parseFloat(e.target.value) })
+}
+
+handleToggleMuted = () => {
+  this.setState({ muted: !this.state.muted })
+}
+
+handleSetPlaybackRate = e => {
+  this.setState({ playbackRate: parseFloat(e.target.value) })
+}
+
+handleTogglePIP = () => {
+  this.setState({ pip: !this.state.pip })
+}
+
+handlePlay = () => {
+  console.log('onPlay')
+  this.setState({ playing: true })
+}
+
+handleEnablePIP = () => {
+  console.log('onEnablePIP')
+  this.setState({ pip: true })
+}
+
+handleDisablePIP = () => {
+  console.log('onDisablePIP')
+  this.setState({ pip: false })
+}
+
+handlePause = () => {
+  console.log('onPause', this.state.playedSeconds);
+  console.log(this.state);
+}
+
+handleSeekMouseDown = e => {
+  //e.preventDefault();
+  let StartTime = this.state.StartTime;
+  if (StartTime === 0){
+    StartTime = this.state.StartTime;
+  };
+  this.setState({ seeking: true })
+  console.log("Mause DOWN");
+
+}
+
+handleSeekChange = e => {
+  this.setState({ played: parseFloat(e.target.value) })
+  //console.log("Change", e.target.value);
+}
+
+
+
+
+handleSeekMouseUp = e => {
+  //e.preventDefault();
+  this.setState({ seeking: false })
+  this.player.seekTo(parseFloat(e.target.value))
+  console.log("Mause UP", e.target.id);
+}
+
+handleProgress = state => {
+  console.log('onProgress', state)
+  // We only want to update time slider if we are not currently seeking
+  if (!this.state.seeking) {
+    this.setState(state)
+  }
+}
+
+handleEnded = () => {
+  console.log('onEnded')
+  this.setState({ playing: this.state.loop })
+}
+
+handleDuration = (duration) => {
+  console.log('onDuration', duration)
+  this.setState({ duration })
+}
+
+/// Player Controls END
+
+
 handleDevChange = (e) =>{
   console.log(e);
 }
 
+playChannel = (e) => {
+  e.preventDefault();
+  const {playURL} = this.state
+  this.setState({showPlayer: true})
+  //call player
 
-handleURLset = (e) =>{
+}
+
+checkStreamig = () => {
+  const {mediaRecorder, wsRef} = this.state;
+  console.log("Check State", this.state)
+  if (mediaRecorder.current){
+    if (mediaRecorder.current.state === 'recording' && wsRef.current.state === 'open') {
+      console.log("Its Streaming altready")
+      this.setState({isStreaming: true, isConnected: true, showCam: true});
+    }
+  }
+};
+
+stopStreaming = () => {
+  const {mediaRecorder, wsRef} = this.state;
+  if (mediaRecorder.current.state === 'recording') {
+    mediaRecorder.current.stop();
+    wsRef.current.close();
+  }
+  this.setState({isStreaming: false, isConnected: false, showPlayer: false});
+};
+
+
+startStreaming = (e) =>{
   e.preventDefault();
   const {rtmpURL, streamKey, wsRef, mediaRecorder, isConnected} = this.state;
   console.log("URL", rtmpURL, streamKey);
@@ -159,20 +344,26 @@ handleURLset = (e) =>{
     streamKey,
     showComponent: true
   })
-  let protocol = window.location.protocol.replace('http', 'ws');
-  let server = "//127.0.0.1:3004"
+  let protocol = window.location.protocol.replace('https', 'wss');
+  let server = "//d355h0s62btcyd.cloudfront.net"
   let wsUrl = `${protocol}//${server}/rtmps/${rtmpURL}${streamKey}`;
   wsRef.current = new WebSocket(wsUrl);
   //var setConnected = {}
   console.log("como esta o wsRef", wsRef)
-  wsRef.current.addEventListener('open', function open() {
-    console.log("Open!!!") /// set state need
+  wsRef.current.addEventListener('open', function open(data) {
+    console.log("Open!!!", data) /// set state need
+    if(data){
+      console.log("!@@@@!!!")
+      this.setState({isConnected: true, isStreaming: true});
+      console.log("State has been set to!!!")
+    }
+  }.bind(this));
+
+  wsRef.current.addEventListener('close', () => {
+    this.stopStreaming();
+    this.setState({isConnected: false})
+    console.log("Closed!!!") /// set state need
   });
-
-
-
-  console.log ("RTMP Values", protocol, wsUrl);
-  console.log ("Stream tem value?", this.state.stream);
 
   let vidSreaming = this.state.stream.current.captureStream(30);
   let audioStream = new MediaStream();
@@ -210,24 +401,32 @@ handleURLset = (e) =>{
   //this.playerShow()
 } 
 
+
+
   render() {
     console.log("reder has been called");
     console.log(this.state);
     document.body.style = 'background: #262626;';
-    const { token, showCam, videoin, audioin, audioout, stream } = this.state;
+    const { token, showCam, videoin, audioin, audioout, stream, isConnected, isStreaming, playURL} = this.state;
+    //Player Const
+    const {showPlayer, pip, playing, controls, light, loop, playbackRate, volume, muted} = this.state;
     console.log("tem token?", token)
     const { rtmpURL, streamKey }  = this.state;
     if (!showCam) {
       console.log("loadding");
       return (
-        <div className="VideoBOX">
+        <div className="EnCamBOX">
+        <div className="textForm">
+          <p>This is a simple webRTC broadcast Demo. Amazon Interactive Video Service, for more details please contact <a href="https://phonetool.amazon.com/users/osmarb">osmarb@</a></p>
+        </div>
+        <div>
           <button type="submit" className="enableCam" onClick={this.listCam}>Enable Cam!</button>
+        </div>
         </div>
       )
     } else{
       console.log("ShowCam", showCam);
       console.log("Tem cameras?", videoin)
-      console.log("como ta o stream", stream)
       return (
         
         <div className="App">
@@ -264,19 +463,13 @@ handleURLset = (e) =>{
                 </div>
         
                 
-              </div>
-
-
-
-
-            
-
-        
+              </div>        
         <div className="player-wrapper"> 
           
         </div>
             <div className="row">
             <div className="col-lg">
+            {!isStreaming &&(
             <div className="form-group">
               <form className="form-URL">
                 <label className="formLabel">
@@ -305,9 +498,15 @@ handleURLset = (e) =>{
                         />
                         </label>
                      
-                    <button type="submit" className="formBot" onClick={this.handleURLset}>GoLive!</button>
+                    <button type="submit" className="formBot" onClick={this.startStreaming}>GoLive!</button>
                 </form>
                 </div>
+                )}
+                {isStreaming &&(
+                  <div>
+                    <button type="submit" className="formBotStop" onClick={this.stopStreaming}>StopStreaming!</button>
+                  </div>
+                )}
               </div>
             </div>
             <div className="DebugBOXger">
@@ -319,20 +518,71 @@ handleURLset = (e) =>{
                   <tbody wordBreak='break-all'>
                     <tr>
                       <th width={100}>
-                        URL:
+                        Play URL:
                       </th>
-                      <td>{rtmpURL}</td>
+                      <td>{playURL}</td>
                     </tr>
                     <tr>
-                      <th>Playing:</th>
-                      <td>True</td>
+                      <th>Transcoder State:</th>
+                      <td>{String(isConnected)}</td>
                     </tr>
                     <tr>
-                      <th> Token:</th>
-                      <td>{token}</td>
+                      <th>Streaming:</th>
+                      <td>{String(isStreaming)}</td>
                     </tr>
                   </tbody>
               </Table>
+              {isStreaming &&(
+                  <div className="playerBOX">
+                  <p className="formatText">Please Wait a few secs before trying to play the channel</p>
+                  <form className="form-Player">
+                  <label className="formLabel">
+                    PlayURL
+                        <input 
+                        id="streamKey" 
+                        type="text"
+                        value={this.state.playURL}
+                        className="formURL" 
+                        aria-label="Sizing example input" 
+                        aria-describedby="inputGroup-sizing-sm1"
+                        onChange={e => this.setState({ playURL: e.target.value, showComponent: false})}
+                        />
+                        </label>
+                    <button type="submit" className="formBot" onClick={this.playChannel}>PlayChannel!</button>
+                    </form>
+                  </div>
+                )}
+                {showPlayer &&(
+                  <div>                        <ReactPlayer
+                  className='react-player'
+                  url={this.state.playURL}
+                  width='100%'
+                  height='100%'
+                  pip={pip}
+                  playing={playing}
+                  controls={controls}
+                  light={light}
+                  loop={loop}
+                  playbackRate={playbackRate}
+                  volume={volume}
+                  muted={muted}
+                  onReady={() => console.log('onReady')}
+                  onStart={() => console.log('onStart')}
+                  onPlay={this.handlePlay}
+                  onEnablePIP={this.handleEnablePIP}
+                  onDisablePIP={this.handleDisablePIP}
+                  onPause={this.handlePause}
+                  onBuffer={() => console.log('onBuffer')}
+                  onSeek={e => console.log('onSeek', e)}
+                  onEnded={this.handleEnded}
+                  onError={e => console.log('onError', e)}
+                  onProgress={this.handleProgress}
+                  onDuration={this.handleDuration}
+                  ref={this.ref}
+                />
+                </div>
+                )}
+
               </div>
             </div>         
             </div>
