@@ -18,12 +18,12 @@ WebRTC to RTMP
 - [ ] Catch server state / 
 - [ ] Catch streaming state
 - [X] Deploy version 1 
-- [ ] tratar audio
+- [X] tratar audio
 - [ ] add bw select box
 - [ ] set Stream key as password form input
 - [ ] clean clode
 - [ ] treat player error and keep trying
-- [ ] use video and audio selected
+- [X] use video and audio selected
 - [ ] simplify player or externalize
 - [X] device selector
 - [ ] audio out

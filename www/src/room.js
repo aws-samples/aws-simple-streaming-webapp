@@ -184,7 +184,7 @@ enableCam () {
   console.log(vDevID, aDevID)
   //const {vDevID} = this.state
   console.log("video ID", this.state.vDevID)
-  var constraints = { audio: {enabled: true, deviceId: aDevID}, video: { width: 1280, height: 720, deviceId: this.state.vDevID } };
+  var constraints = { audio: {autoplay: true, deviceId: aDevID}, video: { width: 1280, height: 720, deviceId: this.state.vDevID } };
   console.log("contrainsts", constraints)
   var stream = this.state
     navigator.mediaDevices
@@ -386,6 +386,7 @@ startStreaming = (e) =>{
   })
   let protocol = window.location.protocol.replace('https', 'wss');
   let server = "//d355h0s62btcyd.cloudfront.net"
+  // //d355h0s62btcyd.cloudfront.net
   let wsUrl = `${protocol}//${server}/rtmps/${rtmpURL}${streamKey}`;
   wsRef.current = new WebSocket(wsUrl);
   //var setConnected = {}
@@ -406,20 +407,27 @@ startStreaming = (e) =>{
   });
 
   let vidSreaming = this.state.stream.current.captureStream(30);
-  let audioStream = new MediaStream();
+  //let audioStream = new MediaStream();
 
   console.log ("procurando audio tracking", this.state.stream.current)
-  console.log ("procurando audio tracking", this.state.stream.current)
+  console.log ("procurando audio tracking", this.state.stream)
   // to sem audio // to be fixed 
+ 
   /*
-  let audioTracks = this.state.stream.current.getAudioTracks();
+  var mediaStreamTracks = MediaStream.getAudioTracks()
+  //console.log ("procurando audio tracking", mediaStreamTracks)
+  
+ 
+  const audioTracks = this.state.stream.current.getAudioTracks();
   audioTracks.forEach(function (track) {
     audioStream.addTrack(track);
   });
   */
 
+
   let outputStream = new MediaStream();
-  [audioStream, vidSreaming].forEach(function (s) {
+  //[audioStream, vidSreaming].forEach(function (s) {
+  [vidSreaming].forEach(function (s) {
     s.getTracks().forEach(function (t) {
       outputStream.addTrack(t);
     });
