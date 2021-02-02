@@ -1,17 +1,14 @@
 // Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-import React, { Component, useEffect, useState, useRef  } from 'react';
+import React, { Component } from 'react';
 //import VideoPlayer from './player';
-import Amplify, { Auth } from 'aws-amplify';
+import Amplify, { Auth, API } from 'aws-amplify';
 import awsmobile from "./aws-exports";
 import ReactPlayer from 'react-player'
 import Table from 'react-bootstrap/Table';
 
 Amplify.configure(awsmobile);
-
-
-
 
 class room extends Component {
   constructor(props) {
@@ -32,7 +29,8 @@ class room extends Component {
       wsRef: React.createRef(),
       mediaRecorder: React.createRef(),
       requestAnimationRef: React.createRef(),
-      videoRef: React.createRef(),
+      vidRef: React.createRef(),
+      showencam: true,
       setCameraEnabled: false,
       playing: true,
       controls: true,
@@ -50,9 +48,9 @@ class room extends Component {
         video: true
       },
       //constraints: { audio: true, video: { width: 1280, height: 720 }},
-      rtmpURL: "rtmps://ca538d4d3d92.global-contribute.live-video.net:443/app/",
-      streamKey: "sk_us-east-1_gecbHp7v8OJg_FN7Uxsqxud0186yUUCnhqcy4PaxTsR",
-      playURL: "https://ca538d4d3d92.us-east-1.playback.live-video.net/api/video/v1/us-east-1.904149973046.channel.5xGI6F0YnnSe.m3u8",
+      rtmpURL: null,
+      streamKey: {},
+      playURL: {},
       showComponent: true,
     };
     //this.handleURLset = this.handleURLset.bind(this);
@@ -60,36 +58,65 @@ class room extends Component {
 
   componentDidMount() {
     // getting access to webcam
-    const videoRef = this.state
-    const video = videoRef.current;
-    const constraints = { video: true }
-    navigator.mediaDevices
-    .getUserMedia({video: true})
-    .then(stream => this.videoRef.current.srcObject = stream)
-    .catch(console.log);
     this.getCurrentUser()
     this.start()
-    this.checkStreamig()
+    this.checkStreamig()  /// sumarize start and check stop alll video sources / tracks
     //console.log("Did Mount")
   }
 
   componentWillUnmount() {
   }
 
-getCurrentUser() {
-  Auth.currentSession({ bypassCache: true }).then(session => {
-    this.setState({
-      session,
-      token: session.accessToken.jwtToken
+  getCurrentUser() {
+    Auth.currentAuthenticatedUser({ bypassCache: true }).then(user => {
+      console.log(user);
+      this.setState({
+        user,
+        username: user.username
+      });
+      //console.log(this.state.username);
+      this.getStream()
+    }); 
+  };
+
+  //get IVS Params
+  
+  getStream() {
+    const {username} = this.state;
+    console.log("tem valor aqui??", username, this.state.username)
+    let apiName = "saveIVSparam"
+    let path = `/putitens/${username}`;
+    API.get(apiName, path)
+    .then(ivsparams => {
+      console.log("response", ivsparams, ivsparams.length)
+      if(ivsparams.length !== 0){
+        this.setState({
+          rtmpURL: ivsparams[0].rtmpURL,
+          streamKey: ivsparams[0].streamKey,
+          playURL: ivsparams[0].playURL,
+          showencam: true
+      })}else{
+        console.log("retornou nada", ivsparams.length)
+        this.setState({showencam: false})
+      }
+    })
+    .catch(error => {
+      console.log(error);
     });
-  });
-};
+  }
+  
 
 // disable all cams // still bug
 start() {
-  console.log("print active cams", window)
-  if (window.stream) {
-    window.stream.getTracks().forEach(track => {
+  
+  const {mediaRecorder, vidRef} = this.state.mediaRecorder
+  console.log("print active cams", vidRef, navigator)
+  if (mediaRecorder){
+    console.log("tem media recorder", mediaRecorder, vidRef)
+  }
+  if (vidRef) {
+    console.log("entrei aqui!!!")
+    vidRef.getTracks().forEach(track => {
       track.stop();
     });
   }
@@ -133,13 +160,8 @@ listCam = async () => {
   let videoin = []
   let audioin = []
   let audioout = []
-  let camlist = []
   await navigator.mediaDevices.enumerateDevices()
     .then(gotDevices => {
-      //console.log("list devices", gotDevices);
-
-      //gotDevices.forEach(logArrayElements);
-
       gotDevices.forEach(function(gotDevice) {
 
 
@@ -179,15 +201,12 @@ listCam = async () => {
 
 
 enableCam () {
-  const {vDevID, aDevID} = this.state
   console.log("Loop enable cam")
-  console.log(vDevID, aDevID)
-  //const {vDevID} = this.state
   console.log("video ID", this.state.vDevID)
-  var constraints = { audio: {autoplay: true, deviceId: aDevID}, video: { width: 1280, height: 720, deviceId: this.state.vDevID } };
+  var {vidRef} = this.state
+  var constraints = { audio: {autoplay: true, deviceId: this.state.aDevID}, video: { width: 1280, height: 720, deviceId: this.state.vDevID } };
   console.log("contrainsts", constraints)
-  var stream = this.state
-    navigator.mediaDevices
+  vidRef.current = navigator.mediaDevices
       .getUserMedia(constraints)
       .then(function(mediaStream) {
         var stream = document.querySelector("video");
@@ -208,6 +227,10 @@ enableCam () {
     })
   
 };
+
+redirTo (){
+  window.location.assign('/admin');
+}
 
 //Player Controls
 
@@ -349,7 +372,6 @@ handleDuration = (duration) => {
 
 playChannel = (e) => {
   e.preventDefault();
-  const {playURL} = this.state
   this.setState({showPlayer: true})
   //call player
 
@@ -377,7 +399,7 @@ stopStreaming = () => {
 
 startStreaming = (e) =>{
   e.preventDefault();
-  const {rtmpURL, streamKey, wsRef, mediaRecorder, isConnected} = this.state;
+  const {rtmpURL, streamKey, wsRef, mediaRecorder} = this.state;
   console.log("URL", rtmpURL, streamKey);
   this.setState({
     rtmpURL,
@@ -452,10 +474,9 @@ startStreaming = (e) =>{
     console.log("reder has been called");
     console.log(this.state);
     document.body.style = 'background: #262626;';
-    const { token, showCam, videoin, audioin, audioout, stream, isConnected, isStreaming, playURL} = this.state;
+    const { showCam, videoin, audioin, audioout, stream, isConnected, isStreaming, playURL, showencam} = this.state;
     //Player Const
     const {showPlayer, pip, playing, controls, light, loop, playbackRate, volume, muted} = this.state;
-    const { rtmpURL, streamKey }  = this.state;
     if (!showCam) {
       console.log("loadding");
       return (
@@ -464,7 +485,18 @@ startStreaming = (e) =>{
           <p>This is a simple webRTC broadcast Demo. Amazon Interactive Video Service, for more details please contact <a href="https://phonetool.amazon.com/users/osmarb">osmarb@</a></p>
         </div>
         <div>
+        {showencam && (
+        <div>
           <button type="submit" className="enableCam" onClick={this.listCam}>Enable Cam!</button>
+        </div>
+        )}
+        </div>
+        <div>
+        {!showencam && (
+                <div>
+                  <button type="submit" className="enableCam"  onClick={this.redirTo}>Config First!</button>        
+                </div>
+        )}
         </div>
         </div>
       )
@@ -503,7 +535,7 @@ startStreaming = (e) =>{
               
                 <div className="webcamBOX">
                 
-                  <video autoPlay={true} ref={stream} id="videoElement" controls></video>
+                  <video autoPlay={true} muted={true} ref={stream} id="videoElement" controls></video>
                 </div>
         
                 
@@ -533,7 +565,7 @@ startStreaming = (e) =>{
                     Stream Key:
                         <input 
                         id="streamKey" 
-                        type="text"
+                        type="password"
                         value={this.state.streamKey}
                         className="formURL" 
                         aria-label="Sizing example input" 
@@ -559,7 +591,7 @@ startStreaming = (e) =>{
               </div>
               <div className="DebugBOX">
               <Table className="DebugTable" variant="dark" responsive="lg" >
-                  <tbody wordBreak='break-all'>
+                  <tbody wordbreak='break-all'>
                     <tr>
                       <th width={100}>
                         Play URL:
@@ -636,20 +668,5 @@ startStreaming = (e) =>{
   }
 }
 export default room;
-
-function logArrayElements(element, index, array) {
-  console.log('a[' + index + '] = ' + element)
-}
-
-async function getMedia(constraints) {
-  let stream = null;
-
-  try {
-    stream = await navigator.mediaDevices.getUserMedia(constraints);
-    console.log("here", stream)
-  } catch(err) {
-    /* handle the error */
-  }
-}
 
 

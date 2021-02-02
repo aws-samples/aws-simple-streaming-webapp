@@ -15,19 +15,17 @@ WebRTC to RTMP
 - [X] Set Streaming State State
 - [X] Show stop streaming
 - [X] add player view
-- [ ] Catch server state / 
-- [ ] Catch streaming state
 - [X] Deploy version 1 
 - [X] tratar audio
 - [ ] add bw select box
-- [ ] set Stream key as password form input
-- [ ] clean clode
+- [X] set Stream key as password form input
+- [X] clean clode
 - [ ] treat player error and keep trying
 - [X] use video and audio selected
 - [ ] simplify player or externalize
 - [X] device selector
-- [ ] audio out
-- [ ] stop all sources 
+- [X] audio out mute (monitor effect)
+- [ ] stop all sources when start
 
 ### Server Side RTMP Relay
 - [X] Deploy version 1 of the server
@@ -48,6 +46,10 @@ WebRTC to RTMP
 ### Blogpost
 - [ ] Work on the website 
 
+### WebApp Backlog Server State, out of MVP
+- [ ] Catch server state / 
+- [ ] Catch streaming state
+
 
 
 References:
@@ -56,3 +58,6 @@ https://github.com/chenxiaoqino/getusermedia-to-rtmp
 https://medium.com/better-programming/add-an-html-canvas-into-your-react-app-176dab099a79
 https://github.com/webrtc/samples/blob/gh-pages/src/content/devices/input-output/js/main.js
 https://github.com/webrtc/samples/blob/gh-pages/src/content/devices/input-output/js/main.js
+https://webrtc.github.io/samples/
+https://developer.mozilla.org/en-us/docs/Web/API/MediaRecorder
+https://stackoverflow.com/questions/27908408/webrtc-how-to-mute-local-audio-output (how to enable monitor like)

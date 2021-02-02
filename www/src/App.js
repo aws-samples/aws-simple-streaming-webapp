@@ -7,13 +7,19 @@ import logo from './img/aws.png';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import Room from './room';
 import RoomAdmin from './roomadm';
-import Amplify from 'aws-amplify';
+import Amplify, { Auth } from 'aws-amplify';
 import { withAuthenticator } from '@aws-amplify/ui-react'
 import awsmobile from './aws-exports';
 
 Amplify.configure(awsmobile);
 
+
 class App extends Component {
+
+  signOut = () => {
+    Auth.signOut();
+  };
+
   render() {
     return (
     <Router>
@@ -27,8 +33,8 @@ class App extends Component {
             <li><Link to={'/admin'} className="nav-link">Admin Panel</Link></li>
           </ul>
              <ul id="nav-mobile" className="right navbar-nav">
-            <li className="float-right">
-                  <a className="nav-link float-right" href="/" >Logout</a>
+             <li className="float-right">
+                  <a className="nav-link float-right" href="/" onClick={this.signOut}>Logout</a>
             </li>
           </ul>
           </nav>

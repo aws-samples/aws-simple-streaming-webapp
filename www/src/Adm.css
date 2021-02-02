@@ -1,0 +1,228 @@
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.player-wrapper
+{
+  display: flex; 
+  justify-content: center;
+  align-items: top;
+  margin: 0 0 20px;
+}
+
+.headerPlayer{
+  text-align: center;
+  line-height: 0px;
+  color: rgb(220, 224, 228);
+  font-size: 24px;
+  margin: 5px;
+  bottom: 100000000px;
+}
+
+.form-URL{
+  display: flex; 
+  justify-content: left;
+  align-items: top;
+  width: 100%;
+  padding: 6px 100px;
+  margin: 18px 0;
+  box-sizing: border-box;
+}
+
+.EnCamBOX{
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center; 
+  margin: 20px;
+  background: #FF9900;
+  width: 550px;
+  height: 130px;
+  padding: 20px;
+}
+
+.textForm{
+  color: white;
+  font-size: 20px;
+}
+
+.form-Player{
+  display: flex; 
+  justify-content: left;
+  align-items: top;
+  width: 100%;
+  padding: 30px 100px;
+  margin: 18px 0;
+  box-sizing: border-box;
+}
+
+.form-control{
+  width: 100%;
+  box-sizing: border-box;
+  width: 220px;
+  height: 38px;
+  margin: 10px;
+}
+
+.form-control-select{
+  text-align: center;
+  margin: auto;
+  display: flex; 
+  justify-content: center;
+  margin: 18px 0;
+  padding:0;
+}
+
+.formURL{
+   display: block;
+  width: 400px;
+  height: 38px;
+  margin: 10px;
+}
+
+.formURLplay{
+  display: block;
+  width: 400px;
+  height: 38px;
+  padding: 10px 30px 10px;
+  margin: 10px;
+}
+
+.formLabelPlayURL{
+  display: block;
+  text-align: center;
+  line-height: 0px;
+  color: rgb(220, 224, 228);
+  font-size: 20px;
+}
+
+.VideoBOX{
+  margin: 20px;
+}
+
+.formBot{
+  display: flex;
+  background-color:	#00b7ff;
+  border: none;
+  color: white;
+  padding: 10px 30px 10px;
+  
+  margin: 9px;
+  display: inline-block;
+  font-size: 16px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.formBotStop{
+  display: flex;
+  background-color:	#ff0011;
+  border: none;
+  color: white;
+  padding: 8px 70px 10px;
+  margin: 9px;
+  display: inline-block;
+  font-size: 18px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.formatText{
+  color: white;
+  font-size: 18px;
+}
+
+.playerBOX{
+  padding: 30px 0px 0px;
+}
+
+.webcamBOX{
+  display: flex; 
+  width: 854px;
+  height: 480px;
+  box-sizing: border-box;
+  justify-content: center;
+  align-items: top;
+  margin: 10px 130px 20px;
+}
+
+
+.enableCam{
+  background-color: #232F3E; /* Blue */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+.formLabel{
+  text-align: center;
+  line-height: 0px;
+  color: rgb(220, 224, 228);
+  font-size: 20px;
+}
+
+
+.DebugBOXger{
+  line-height: 0px;
+  color: rgb(220, 224, 228);
+  margin: 0px;
+  padding: 6px 200px;
+  
+
+}
+
+.DebugBOXtitle{
+  text-align: left;
+  line-height: 0px;
+  color: rgb(220, 224, 228);
+  font-size: 16px;
+  margin: 0 0 15px;
+}
+
+.DebugBOX{
+  margin: 0;
+  background-color: #282c34;
+  line-height: 0px;
+  text-align: left;
+  color: #26262626;
+  overflow: auto;
+  scrollbar-width: none;
+  
+  
+}
+
+.DebugTable{
+  table-layout: flex;
+  word-wrap: break-all;
+  white-space: nowrap;
+  width: 100%;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
