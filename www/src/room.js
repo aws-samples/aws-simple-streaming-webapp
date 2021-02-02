@@ -1,5 +1,6 @@
 // Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
+// branch with player
 
 import React, { Component } from 'react';
 import Amplify, { Auth, API } from 'aws-amplify';
@@ -310,8 +311,8 @@ startStreaming = (e) =>{
     streamKey,
     showComponent: true
   })
-  let protocol = window.location.protocol.replace('https', 'wss');
-  let server = "//d355h0s62btcyd.cloudfront.net"
+  let protocol = window.location.protocol.replace('http', 'ws');
+  let server = "//ivs-webrtc.hazel-rah.com"
   // //d355h0s62btcyd.cloudfront.net
   let wsUrl = `${protocol}//${server}/rtmps/${rtmpURL}${streamKey}`;
   wsRef.current = new WebSocket(wsUrl);
