@@ -2,25 +2,39 @@
 // SPDX-License-Identifier: MIT-0
 
 import React, { Component } from 'react';
-//import VideoPlayer from './player';
 import Amplify, { Auth, API } from 'aws-amplify';
 import awsmobile from "./aws-exports";
-import ReactPlayer from 'react-player'
-import Table from 'react-bootstrap/Table';
 
 Amplify.configure(awsmobile);
+
+const constraints = window.constraints = {
+  audio: false,
+  video: { width: 1280, height: 720 }
+};
 
 class room extends Component {
   constructor(props) {
     super(props);
+    this.vidRef = React.createRef();
     this.state = {
-      token: 1,
-      stream:React.createRef(),
+      username: "",
+      video:React.createRef(),
+      stream: React.createRef(),
       gotDevices: React.createRef(),
-      videoin: React.createRef(),
-      copyItems: [],
-      audioin: [],
-      audioout:[],
+      videoin: [{
+        label: "",
+        id: ""
+      }],
+      audioin: [{
+        label: "",
+        id: ""
+      }],
+      audioout: [{
+        label: "",
+        id: ""
+      }],
+      errorMSG: "",
+      apiResult: true,
       isConnected: false,
       isStreaming: false,
       showPlayer: false,
@@ -29,99 +43,214 @@ class room extends Component {
       wsRef: React.createRef(),
       mediaRecorder: React.createRef(),
       requestAnimationRef: React.createRef(),
-      vidRef: React.createRef(),
       showencam: true,
       setCameraEnabled: false,
-      playing: true,
-      controls: true,
-      light: false,
-      volume: 0.8,
-      muted: false,
-      played: 0,
-      loaded: 0,
-      duration: 0,
-      playbackRate: 1.0,
-      vDevID: 'video', //replace with def 
-      aDevID: document.querySelector("select#audioSource"),
+      vDevID: '', //replace with def 
+      aDevID: '',
       CAMERA_CONSTRAINTS: {
         audio: true,
         video: true
       },
-      //constraints: { audio: true, video: { width: 1280, height: 720 }},
       rtmpURL: null,
       streamKey: {},
       playURL: {},
       showComponent: true,
     };
-    //this.handleURLset = this.handleURLset.bind(this);
+    this.getCurrentUser()
+    this.initFunc()
   }
 
   componentDidMount() {
-    // getting access to webcam
-    this.getCurrentUser()
     this.start()
-    this.checkStreamig()  /// sumarize start and check stop alll video sources / tracks
-    //console.log("Did Mount")
+  }
+  
+  // C1 - init CAM
+  initFunc = async () =>{
+    //get camera stated and enum devices
+    try{
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      const gotDevices = await navigator.mediaDevices.enumerateDevices()
+      this.handleList(gotDevices, mediaStream);
+      //
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+  
+  // C2 - list Cameras
+  handleList (gotDevices) {
+    let videoin = []
+    let audioin = []
+    let audioout = []
+    gotDevices.forEach(function(gotDevice) {
+      if (gotDevice.kind === 'videoinput'){
+        //console.log("video", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
+        videoin.push({label: gotDevice.label, id: gotDevice.deviceId})
+      }
+      if (gotDevice.kind === 'audioinput'){
+        //console.log("audioin", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
+        audioin.push({label: gotDevice.label, id: gotDevice.deviceId})
+      }
+      if (gotDevice.kind === 'audiooutput'){
+        //console.log("audioout", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
+        audioout.push({label: gotDevice.label, id: gotDevice.deviceId})
+      }
+    })
+  
+    this.state.videoin = videoin
+    this.state.audioin = audioin
+    this.state.audioout = audioout 
   }
 
-  componentWillUnmount() {
-  }
-
+  // U1 - get user name
   getCurrentUser() {
     Auth.currentAuthenticatedUser({ bypassCache: true }).then(user => {
-      console.log(user);
-      this.setState({
-        user,
-        username: user.username
+      const username = user.username
+      this.getStream(username)
       });
-      //console.log(this.state.username);
-      this.getStream()
-    }); 
   };
-
-  //get IVS Params
-  
-  getStream() {
-    const {username} = this.state;
-    console.log("tem valor aqui??", username, this.state.username)
+        
+  // U2 - get IVS param
+  getStream(username) {
+    console.log("tem valor aqui??", username)
     let apiName = "saveIVSparam"
     let path = `/putitens/${username}`;
     API.get(apiName, path)
     .then(ivsparams => {
-      console.log("response", ivsparams, ivsparams.length)
-      if(ivsparams.length !== 0){
+      console.log(ivsparams.length)
+      if (ivsparams.length === 1) {
         this.setState({
           rtmpURL: ivsparams[0].rtmpURL,
           streamKey: ivsparams[0].streamKey,
           playURL: ivsparams[0].playURL,
-          showencam: true
-      })}else{
-        console.log("retornou nada", ivsparams.length)
-        this.setState({showencam: false})
+          apiResult: true,
+        })
+      } else {
+        this.redirTo() // in case IVS is not configured
       }
     })
     .catch(error => {
       console.log(error);
     });
   }
+
+// U3 - incase IVS is not configured
+redirTo (){
+  console.error("Not Configured or Time out API")
+  window.location.assign('/admin') 
+}
+
+// C3 enable camera 
+enableCam = async () => {
+  console.log("Loop enable cam")
+  console.log("video ID", this.state.vDevID)
+  const constraints = { audio: {autoplay: true, deviceId: this.state.aDevID}, video: { width: 1280, height: 720, deviceId: this.state.vDevID } };
+  console.log("contrainsts", constraints)
+  var stream = this.state
+  await navigator.mediaDevices.getUserMedia(
+    constraints
+    ).then(function(mediaStream) {
+        console.log("assim ta o media strema", mediaStream);
+        window.stream = mediaStream;
+        var stream = document.querySelector('video');
+        console.log("E o stream??", stream)
+        var videoTracks = mediaStream.getVideoTracks();
+
+        
+        console.log('Got stream with constraints:', constraints);
+        console.log(`Using video device: ${videoTracks[0].label}`);
+
+        //window.stream = stream;
+        stream.srcObject = mediaStream;
+
+        console.log("UUUUU", stream)
+
+        stream.onloadedmetadata = async function (e) {
+          await stream.play();
+        };
+
+
+      })
+      .catch(error =>  {
+        console.error("Error in EnCam", error);
+        this.handleError(error);
+      }); 
+      
+      //this.setState({showCam: true})
+      console.log("en cam", this.state.showCam);
+};
+
+ // C2.1 In case error to enable cam  
+ handleError(error) {
+  if (error.name === 'ConstraintNotSatisfiedError') {
+    const v = constraints.video;
+    console.error(`The resolution ${v.width.exact}x${v.height.exact} px is not supported by your device.`);
+  } else if (error.name === 'NotAllowedError') {
+    console.error('Permissions have not been granted to use your camera and ' +
+      'microphone, you need to allow the page access to your devices in ' +
+      'order for the demo to work.');
+  }
+  console.error(`getUserMedia error: ${error.name}`, error);
+  this.setState({errorMSG: error.name});
+}
+
+//0 - list cam and update cams 
+listCam = async () => {
+  let copyItems = this.value
+  let gotDevice = []
+  let videoin = []
+  let audioin = []
+  let audioout = []
+  await navigator.mediaDevices.enumerateDevices()
+    .then(gotDevices => {
+      gotDevices.forEach(function(gotDevice) {
+        if (gotDevice.kind === 'videoinput'){
+          //console.log("video", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
+          videoin.push({label: gotDevice.label, id: gotDevice.deviceId})
+          console.log("como esta video in!!!!!!", videoin)
+        }
+        if (gotDevice.kind === 'audioinput'){
+          //console.log("audioin", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
+          audioin.push({label: gotDevice.label, id: gotDevice.deviceId})
+        }
+        if (gotDevice.kind === 'audiooutput'){
+          //console.log("audioout", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
+          audioout.push({label: gotDevice.label, id: gotDevice.deviceId})
+        }
+      });
+      this.setState({
+        videoin,
+        audioin,
+        audioout,
+        copyItems,
+        gotDevice
+      }, () => {this.enableCam()}) 
+      console.log("check state", this.state);
+    })
+    .catch(function(err) {
+      console.log(err.name + ": " + err.message);
+    }); 
+  };
   
 
-// disable all cams // still bug
+// C4 disable all cams // still bug
 start() {
-  
   const {mediaRecorder, vidRef} = this.state.mediaRecorder
   console.log("print active cams", vidRef, navigator)
   if (mediaRecorder){
     console.log("tem media recorder", mediaRecorder, vidRef)
   }
-  if (vidRef) {
+  console.log("B4 Window", window) 
+  if (window.stream) {
     console.log("entrei aqui!!!")
-    vidRef.getTracks().forEach(track => {
+    window.stream.getTracks().forEach(track => {
       track.stop();
     });
+    console.log("After Window", window.stream) 
   }
 }
 
+// C5 handle device change
 handleDevChange = event => {
   /// if audio if video 
   event.preventDefault();
@@ -149,245 +278,19 @@ handleDevChange = event => {
   console.log("check this.state", this.state)
   
 }
-// this handle device change 
 
-
-listCam = async () => {
-  // 0 list cam
-  
-  let copyItems = this.value
-  let gotDevice = []
-  let videoin = []
-  let audioin = []
-  let audioout = []
-  await navigator.mediaDevices.enumerateDevices()
-    .then(gotDevices => {
-      gotDevices.forEach(function(gotDevice) {
-
-
-        
-        //console.log(gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
-        //devId = gotDevice.deviceId
-        if (gotDevice.kind === 'videoinput'){
-          //console.log("video", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
-          videoin.push({label: gotDevice.label, id: gotDevice.deviceId})
-          console.log("como esta video in!!!!!!", videoin)
-        }
-        if (gotDevice.kind === 'audioinput'){
-          //console.log("audioin", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
-          audioin.push({label: gotDevice.label, id: gotDevice.deviceId})
-        }
-        if (gotDevice.kind === 'audiooutput'){
-          //console.log("audioout", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
-          audioout.push({label: gotDevice.label, id: gotDevice.deviceId})
-        }
-      });
-      
-      this.setState({
-        videoin,
-        audioin,
-        audioout,
-        copyItems,
-        gotDevice
-      })
-      console.log("check state", this.state);
-    })
-    .catch(function(err) {
-      console.log(err.name + ": " + err.message);
-    });
-    console.log("check state 2", this.state);
-    this.enableCam()
-  };
-
-
-enableCam () {
-  console.log("Loop enable cam")
-  console.log("video ID", this.state.vDevID)
-  var {vidRef} = this.state
-  var constraints = { audio: {autoplay: true, deviceId: this.state.aDevID}, video: { width: 1280, height: 720, deviceId: this.state.vDevID } };
-  console.log("contrainsts", constraints)
-  vidRef.current = navigator.mediaDevices
-      .getUserMedia(constraints)
-      .then(function(mediaStream) {
-        var stream = document.querySelector("video");
-        console.log("doc query selector", stream, constraints)
-
-        stream.srcObject = mediaStream;
-        stream.onloadedmetadata = function(e) {
-          stream.play();
-        };
-      })
-      .catch(function(err) {
-        console.log(err.name + ": " + err.message);
-      }); // always check for errors at the end.
-
-    this.setState({
-        showCam: true,
-        //stream
-    })
-  
-};
-
-redirTo (){
-  window.location.assign('/admin');
+// P1 - Open Player windown - future implemtation 
+openPlayer (){
+  window.open('/player', '_blank');
 }
 
-//Player Controls
-
-
-handlePlayPause = () => {
-  this.setState({ playing: !this.state.playing })
-}
-
-handleStop = () => {
-  this.setState({ url: null, playing: false })
-}
-
-handleStart = () => {
-  console.log("state", this.state.StartTime, this.state.playedSeconds);
-  console.log("trunc",  Math.floor(this.state.playedSeconds));
-  console.log ("remaining", Math.floor(this.state.duration * (1 - this.state.played)));
-  //let playedsectrunc = Math.floor(this.state.playedSeconds)
-  let remaining = Math.floor(this.state.duration * (1 - this.state.played))
-  this.setState({ 
-    playing: true,
-    //Total: Number(this.state.StartTime) + Number(playedsectrunc), //for VOD
-    StartTime: Math.floor(Date.now()/1000) - Number(remaining)
-    
-  },
-  this.sendStateToParent);
-  console.log ("vamo ver!", this.state.StartTime);
-}
-
-handleEnd = () => {
-  //let playedsecend = Math.floor(this.state.playedSeconds)
-  console.log ("remaining", Math.floor(this.state.duration * (1 - this.state.played)));
-  //let playedsectrunc = Math.floor(this.state.playedSeconds)
-  let remaining = Math.floor(this.state.duration * (1 - this.state.played))
-  //this.setState({ url: null, playing: false })
-  this.setState({ 
-    //playing: false,
-    //TotalEnd: Number(this.state.StartTime) + Number(playedsecend),
-    EndTime: Math.floor(Date.now()/1000) - Number(remaining),
-    showComponentdois: true
-  })
-}
-
-handleToggleControls = () => {
-  const url = this.state.url
-  this.setState({
-    controls: !this.state.controls,
-    url: null
-  }, () => this.load(url))
-}
-
-handleToggleLight = () => {
-  this.setState({ light: !this.state.light })
-}
-
-handleToggleLoop = () => {
-  this.setState({ loop: !this.state.loop })
-}
-
-handleVolumeChange = e => {
-  this.setState({ volume: parseFloat(e.target.value) })
-}
-
-handleToggleMuted = () => {
-  this.setState({ muted: !this.state.muted })
-}
-
-handleSetPlaybackRate = e => {
-  this.setState({ playbackRate: parseFloat(e.target.value) })
-}
-
-handleTogglePIP = () => {
-  this.setState({ pip: !this.state.pip })
-}
-
-handlePlay = () => {
-  console.log('onPlay')
-  this.setState({ playing: true })
-}
-
-handleEnablePIP = () => {
-  console.log('onEnablePIP')
-  this.setState({ pip: true })
-}
-
-handleDisablePIP = () => {
-  console.log('onDisablePIP')
-  this.setState({ pip: false })
-}
-
-handlePause = () => {
-  console.log('onPause', this.state.playedSeconds);
-  console.log(this.state);
-}
-
-handleSeekMouseDown = e => {
-  //e.preventDefault();
-  let StartTime = this.state.StartTime;
-  if (StartTime === 0){
-    StartTime = this.state.StartTime;
-  };
-  this.setState({ seeking: true })
-  console.log("Mause DOWN");
-
-}
-
-handleSeekChange = e => {
-  this.setState({ played: parseFloat(e.target.value) })
-  //console.log("Change", e.target.value);
-}
-
-handleSeekMouseUp = e => {
-  //e.preventDefault();
-  this.setState({ seeking: false })
-  this.player.seekTo(parseFloat(e.target.value))
-  console.log("Mause UP", e.target.id);
-}
-
-handleProgress = state => {
-  console.log('onProgress', state)
-  // We only want to update time slider if we are not currently seeking
-  if (!this.state.seeking) {
-    this.setState(state)
-  }
-}
-
-handleEnded = () => {
-  console.log('onEnded')
-  this.setState({ playing: this.state.loop })
-}
-
-handleDuration = (duration) => {
-  console.log('onDuration', duration)
-  this.setState({ duration })
-}
-
-/// Player Controls END ==> external module
-
-
-
+// P2 - Player - external
 playChannel = (e) => {
   e.preventDefault();
   this.setState({showPlayer: true})
-  //call player
-
 }
 
-checkStreamig = () => {
-  const {mediaRecorder, wsRef} = this.state;
-  console.log("Check State", this.state)
-  if (mediaRecorder.current){
-    if (mediaRecorder.current.state === 'recording' && wsRef.current.state === 'open') {
-      console.log("Its Streaming altready")
-      this.setState({isStreaming: true, isConnected: true, showCam: true});
-    }
-  }
-};
-
+// S2 - Stop streaming to IVS
 stopStreaming = () => {
   const {mediaRecorder, wsRef} = this.state;
   if (mediaRecorder.current.state === 'recording') {
@@ -397,6 +300,7 @@ stopStreaming = () => {
   this.setState({isStreaming: false, isConnected: false, showPlayer: false});
 };
 
+//S1 - Start streaming to IVS
 startStreaming = (e) =>{
   e.preventDefault();
   const {rtmpURL, streamKey, wsRef, mediaRecorder} = this.state;
@@ -411,104 +315,60 @@ startStreaming = (e) =>{
   // //d355h0s62btcyd.cloudfront.net
   let wsUrl = `${protocol}//${server}/rtmps/${rtmpURL}${streamKey}`;
   wsRef.current = new WebSocket(wsUrl);
-  //var setConnected = {}
   console.log("como esta o wsRef", wsRef)
+
   wsRef.current.addEventListener('open', function open(data) {
     console.log("Open!!!", data) /// set state need
     if(data){
       console.log("!@@@@!!!")
       this.setState({isConnected: true, isStreaming: true});
-      console.log("State has been set to!!!")
+      //console.log("State has been set to!!!")
     }
   }.bind(this));
-
   wsRef.current.addEventListener('close', () => {
     this.stopStreaming();
     this.setState({isConnected: false})
     console.log("Closed!!!") /// set state need
   });
 
-  let vidSreaming = this.state.stream.current.captureStream(30);
-  //let audioStream = new MediaStream();
+  //console.log("State do Streaming!!!!!!!", this.state.stream)
 
-  console.log ("procurando audio tracking", this.state.stream.current)
-  console.log ("procurando audio tracking", this.state.stream)
-  // to sem audio // to be fixed 
- 
-  /*
-  var mediaStreamTracks = MediaStream.getAudioTracks()
-  //console.log ("procurando audio tracking", mediaStreamTracks)
-  
- 
-  const audioTracks = this.state.stream.current.getAudioTracks();
-  audioTracks.forEach(function (track) {
-    audioStream.addTrack(track);
-  });
-  */
-
-
+  let vidStreaming = this.state.stream.current.captureStream(30);
   let outputStream = new MediaStream();
-  //[audioStream, vidSreaming].forEach(function (s) {
-  [vidSreaming].forEach(function (s) {
+  [vidStreaming].forEach(function (s) {
     s.getTracks().forEach(function (t) {
       outputStream.addTrack(t);
     });
   });
-
   mediaRecorder.current = new MediaRecorder(outputStream, {
     mimeType: 'video/webm',
     videoBitsPerSecond: 3000000,
   });
-
   mediaRecorder.current.addEventListener('dataavailable', (e) => {
     wsRef.current.send(e.data);
   });
-
-  // implementar listener de stop
-
   mediaRecorder.current.start(1000);
-
-  //this.playerShow()
 } 
   render() {
     console.log("reder has been called");
     console.log(this.state);
     document.body.style = 'background: #262626;';
-    const { showCam, videoin, audioin, audioout, stream, isConnected, isStreaming, playURL, showencam} = this.state;
-    //Player Const
-    const {showPlayer, pip, playing, controls, light, loop, playbackRate, volume, muted} = this.state;
-    if (!showCam) {
-      console.log("loadding");
-      return (
-        <div className="EnCamBOX">
-        <div className="textForm">
-          <p>This is a simple webRTC broadcast Demo. Amazon Interactive Video Service, for more details please contact <a href="https://phonetool.amazon.com/users/osmarb">osmarb@</a></p>
-        </div>
-        <div>
-        {showencam && (
-        <div>
-          <button type="submit" className="enableCam" onClick={this.listCam}>Enable Cam!</button>
-        </div>
-        )}
-        </div>
-        <div>
-        {!showencam && (
-                <div>
-                  <button type="submit" className="enableCam"  onClick={this.redirTo}>Config First!</button>        
-                </div>
-        )}
-        </div>
-        </div>
-      )
-    } else{
+    const { showCam, videoin, audioin, audioout, stream, isConnected, isStreaming, playURL, errorMSG, apiResult, video} = this.state;
+    console.log("Tem Video IN???", videoin);
+    if (videoin.length > 1){
       console.log("ShowCam", showCam);
       console.log("Tem cameras?", videoin.label)
+      this.enableCam()
       return (
-        
         <div className="App">
         <div className="container fluid" style={{backgroundColor: "#262626"}}>
             <div className="headerPlayer">
               <h1>Simple IVS Streming</h1>
+              {errorMSG && (<div className="errorMSG">
+                  <p>Please enable your Camera, check browser Permissions.</p>
+                  <p>Error: {errorMSG}</p>
+                </div>
+              )}
             </div>
                 <div className="row">
                 <div className="col-md">
@@ -534,7 +394,6 @@ startStreaming = (e) =>{
               <div className="row">
               
                 <div className="webcamBOX">
-                
                   <video autoPlay={true} muted={true} ref={stream} id="videoElement" controls></video>
                 </div>
         
@@ -573,8 +432,9 @@ startStreaming = (e) =>{
                         onChange={e => this.setState({ streamKey: e.target.value, showComponent: false})}
                         />
                         </label>
-                     
-                    <button type="submit" className="formBot" onClick={this.startStreaming}>GoLive!</button>
+                    <div className="formLabel">
+                      <button type="submit" className="formBot" onClick={this.startStreaming}>GoLive!</button>
+                    </div>
                 </form>
                 </div>
                 )}
@@ -590,12 +450,10 @@ startStreaming = (e) =>{
                 <a>Info:</a>
               </div>
               <div className="DebugBOX">
-              <Table className="DebugTable" variant="dark" responsive="lg" >
-                  <tbody wordbreak='break-all'>
+              <table className="DebugTable">
+                  <tbody>
                     <tr>
-                      <th width={100}>
-                        Play URL:
-                      </th>
+                      <th width={100}>Play URL:</th>
                       <td>{playURL}</td>
                     </tr>
                     <tr>
@@ -607,7 +465,7 @@ startStreaming = (e) =>{
                       <td>{String(isStreaming)}</td>
                     </tr>
                   </tbody>
-              </Table>
+              </table>
               {isStreaming &&(
                   <div className="playerBOX">
                   <p className="formatText">Please Wait a few secs before trying to play the channel</p>
@@ -618,55 +476,37 @@ startStreaming = (e) =>{
                         id="streamKey" 
                         type="text"
                         value={this.state.playURL}
-                        className="formURL" 
+                        className="formURLplayCh" 
                         aria-label="Sizing example input" 
                         aria-describedby="inputGroup-sizing-sm1"
                         onChange={e => this.setState({ playURL: e.target.value, showComponent: false})}
                         />
                         </label>
-                    <button type="submit" className="formBot" onClick={this.playChannel}>PlayChannel!</button>
                     </form>
                   </div>
                 )}
-                {showPlayer &&(
-                  <div>                        <ReactPlayer
-                  className='react-player'
-                  url={this.state.playURL}
-                  width='100%'
-                  height='100%'
-                  pip={pip}
-                  playing={playing}
-                  controls={controls}
-                  light={light}
-                  loop={loop}
-                  playbackRate={playbackRate}
-                  volume={volume}
-                  muted={muted}
-                  onReady={() => console.log('onReady')}
-                  onStart={() => console.log('onStart')}
-                  onPlay={this.handlePlay}
-                  onEnablePIP={this.handleEnablePIP}
-                  onDisablePIP={this.handleDisablePIP}
-                  onPause={this.handlePause}
-                  onBuffer={() => console.log('onBuffer')}
-                  onSeek={e => console.log('onSeek', e)}
-                  onEnded={this.handleEnded}
-                  onError={e => console.log('onError', e)}
-                  onProgress={this.handleProgress}
-                  onDuration={this.handleDuration}
-                  ref={this.ref}
-                />
-                </div>
-                )}
-
               </div>
             </div>         
             </div>
         </div>
       );
+    } else {
+
+      console.log("wait")
+      return(
+      <div>
+          <div className="loading">Loading ...</div>
+          {errorMSG && (<div className="errorMSG">
+            <p>Please enable your Camera, check browser Permissions.</p>
+            <p>Error: {errorMSG}</p>
+          </div>
+          )}
+      </div>
+      )
+      
     }
   }
 }
 export default room;
 
-
+//    Open extrenal player    <button type="submit" className="formBot" onClick={this.openPlayer}>PlayChannel!</button>

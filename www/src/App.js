@@ -8,7 +8,7 @@ import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import Room from './room';
 import RoomAdmin from './roomadm';
 import Amplify, { Auth } from 'aws-amplify';
-import { withAuthenticator } from '@aws-amplify/ui-react'
+//import { withAuthenticator } from '@aws-amplify/ui-react'
 import awsmobile from './aws-exports';
 
 Amplify.configure(awsmobile);
@@ -29,8 +29,7 @@ class App extends Component {
           <a class="navbar-brand" href="#">
             <img src={logo} alt={logo} width="65"/>
           </a>
-            <li><Link to={'/'} className="nav-link">Room</Link></li>
-            <li><Link to={'/admin'} className="nav-link">Admin Panel</Link></li>
+            <li><Link to={'/'} className="nav-link">Home</Link></li>
           </ul>
              <ul id="nav-mobile" className="right navbar-nav">
              <li className="float-right">
@@ -40,8 +39,8 @@ class App extends Component {
           </nav>
           <hr />
           <Switch>
-              <Route exact path='/admin' component={RoomAdmin} />
-              <Route exact path='/' component={Room}/>
+              <Route exact path='/' component={RoomAdmin} />
+              <Route exact path='/encam' component={Room}/>
           </Switch>
           <div>
            </div>
@@ -51,4 +50,4 @@ class App extends Component {
     );
   }
 }
-export default withAuthenticator(App);
+export default App;

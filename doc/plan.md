@@ -22,10 +22,16 @@ WebRTC to RTMP
 - [X] clean clode
 - [ ] treat player error and keep trying
 - [X] use video and audio selected
-- [ ] simplify player or externalize
+- [ ] simplify player or externalize 
 - [X] device selector
 - [X] audio out mute (monitor effect)
 - [ ] stop all sources when start
+- [X] Logout to work
+- [X] menu rebuild
+- [X] bug cam was enabled too fast
+- [X] Wait cam to be on on Admin Page
+- [X] Cam error treat
+- [ ] Stream error capture
 
 ### Server Side RTMP Relay
 - [X] Deploy version 1 of the server
@@ -52,7 +58,7 @@ WebRTC to RTMP
 
 
 
-References:
+### References:
 
 https://github.com/chenxiaoqino/getusermedia-to-rtmp
 https://medium.com/better-programming/add-an-html-canvas-into-your-react-app-176dab099a79
@@ -61,3 +67,8 @@ https://github.com/webrtc/samples/blob/gh-pages/src/content/devices/input-output
 https://webrtc.github.io/samples/
 https://developer.mozilla.org/en-us/docs/Web/API/MediaRecorder
 https://stackoverflow.com/questions/27908408/webrtc-how-to-mute-local-audio-output (how to enable monitor like)
+
+### Demo Params:
+sk_us-east-1_gecbHp7v8OJg_FN7Uxsqxud0186yUUCnhqcy4PaxTsR
+rtmps://ca538d4d3d92.global-contribute.live-video.net:443/app/
+https://ca538d4d3d92.us-east-1.playback.live-video.net/api/video/v1/us-east-1.904149973046.channel.5xGI6F0YnnSe.m3u8

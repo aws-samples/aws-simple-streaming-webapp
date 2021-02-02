@@ -2,6 +2,20 @@
   text-align: center;
 }
 
+.loading{
+  color: white;
+  padding: 6px 10px;
+}
+
+.welcome{
+  color: white;
+  padding: auto;
+}
+
+.title{
+  padding: 0px 0px 15px;
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -31,42 +45,67 @@
   color: rgb(220, 224, 228);
   font-size: 24px;
   margin: 5px;
-  bottom: 100000000px;
 }
 
 .form-URL{
   display: flex; 
   justify-content: left;
-  align-items: top;
   width: 100%;
-  padding: 6px 100px;
-  margin: 18px 0;
+  margin: 0px 0;
   box-sizing: border-box;
 }
 
 .EnCamBOX{
   box-sizing: border-box;
   display: flex;
-  justify-content: center; 
-  margin: 20px;
-  background: #FF9900;
+  justify-content: center;
+  text-align: left;
+  margin: auto;
+  background: #070829;
   width: 550px;
-  height: 130px;
-  padding: 20px;
+  height: 100%;
+  padding: auto;
 }
 
 .textForm{
   color: white;
   font-size: 20px;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
 }
+
+.errorMSG{
+  color: red;
+  display: flex;
+  justify-content: center;
+}
+
+
+.textFormivs{
+  display: flex;
+  color: white;
+  font-size: 20px;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+}
+
+.form-ivs{
+  justify-content: center;
+  margin: auto;
+  padding: auto;
+  align-items: center;
+}
+
 
 .form-Player{
   display: flex; 
-  justify-content: left;
+  justify-content: center;
   align-items: top;
   width: 100%;
-  padding: 30px 100px;
-  margin: 18px 0;
+  padding: 20px 0px;
+  margin: auto;
   box-sizing: border-box;
 }
 
@@ -88,17 +127,25 @@
 }
 
 .formURL{
-   display: block;
-  width: 400px;
+  display: flex;
+  width: 350px;
   height: 38px;
   margin: 10px;
 }
 
 .formURLplay{
   display: block;
-  width: 400px;
+  width: 300px;
   height: 38px;
   padding: 10px 30px 10px;
+  margin: 10px;
+}
+
+.formURLplayCh{
+  display: block;
+  width: 600px;
+  height: 38px;
+  padding: 10px 0px 10px;
   margin: 10px;
 }
 
@@ -114,31 +161,30 @@
   margin: 20px;
 }
 
+.configFirst{
+  color: orange;
+  font-size: 16px;
+  padding: 10px 100px 10px;
+  margin: auto;
+}
+
+
 .formBot{
   display: flex;
   background-color:	#00b7ff;
   border: none;
   color: white;
   padding: 10px 30px 10px;
-  
-  margin: 9px;
+  margin-top: 1000px;
+  margin: 8px;
   display: inline-block;
   font-size: 16px;
   height: 40px;
   border-radius: 8px;
 }
 
-.formBotStop{
-  display: flex;
-  background-color:	#ff0011;
-  border: none;
-  color: white;
-  padding: 8px 70px 10px;
-  margin: 9px;
-  display: inline-block;
-  font-size: 18px;
-  height: 40px;
-  border-radius: 8px;
+.botForm{
+  padding: 40px 0px 10px;
 }
 
 .formatText{
@@ -160,25 +206,32 @@
   margin: 10px 130px 20px;
 }
 
+.saved{
+  color: greenyellow;
+  margin: auto;
+  text-align: right;
+  padding: 0px 250px 0px;
+}
 
 .enableCam{
   background-color: #232F3E; /* Blue */
-  border: none;
   color: white;
-  padding: 15px 32px;
+  padding: auto;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
   font-size: 16px;
-  margin: 4px 2px;
+  margin: auto;
   cursor: pointer;
+  display: flex;
 }
 
 .formLabel{
   text-align: center;
+  justify-content: center;
   line-height: 0px;
   color: rgb(220, 224, 228);
   font-size: 20px;
+  padding: 30px 0px 0px;
 }
 
 
@@ -187,8 +240,6 @@
   color: rgb(220, 224, 228);
   margin: 0px;
   padding: 6px 200px;
-  
-
 }
 
 .DebugBOXtitle{
