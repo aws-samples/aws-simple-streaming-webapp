@@ -16,6 +16,10 @@
   padding: 0px 0px 15px;
 }
 
+.form-group{
+  margin: auto;
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -110,11 +114,21 @@
 }
 
 .form-control{
-  width: 100%;
   box-sizing: border-box;
   width: 220px;
   height: 38px;
   margin: 10px;
+}
+
+.form-control-play{
+  width: 440px;
+  height: 40px;
+  margin: 10px 0;
+  display: inline-block;
+  box-sizing: border-box;
+  border: 1px solid lightgrey;
+  border-radius: 5px;
+  border-color: lightgrey;
 }
 
 .form-control-select{
@@ -142,10 +156,10 @@
 }
 
 .formURLplayCh{
-  display: block;
-  width: 600px;
+  width: 100%;
+  box-sizing: border-box;
+  width: 220px;
   height: 38px;
-  padding: 10px 0px 10px;
   margin: 10px;
 }
 
@@ -183,6 +197,33 @@
   border-radius: 8px;
 }
 
+.formBotConecting{
+  display: flex;
+  background-color: red;
+  border: none;
+  color: white;
+  padding: 10px 30px 10px;
+  margin-top: 1000px;
+  margin: 8px;
+  display: inline-block;
+  font-size: 16px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.formBotPlay{
+  display: flex;
+  background-color:	#00b7ff;
+  border: none;
+  color: white;
+  padding: 2px 20px 0px;
+  margin: 12px;
+  display: inline-block;
+  font-size: 16px;
+  height: 40px;
+  border-radius: 8px;
+}
+
 .botForm{
   padding: 40px 0px 10px;
 }
@@ -198,12 +239,19 @@
 
 .webcamBOX{
   display: flex; 
-  width: 854px;
-  height: 480px;
-  box-sizing: border-box;
+  width: 640px;
+  height: 360px;
   justify-content: center;
+  margin: auto;
+  padding: 0px 0px 0px 0px;
+}
+
+.playercamBOX{
+  display: flex;
+  justify-content: center; 
   align-items: top;
-  margin: 10px 130px 20px;
+  margin: auto;
+  padding: 0px 0px 0px;
 }
 
 .saved{

@@ -3,8 +3,10 @@
 // branch with player
 
 import React, { Component } from 'react';
-import Amplify, { Auth, API } from 'aws-amplify';
+import Amplify, { Auth, API, selectInput } from 'aws-amplify';
 import awsmobile from "./aws-exports";
+import VideoPlayer from './player';
+import offAir from './offair.jpg'
 
 Amplify.configure(awsmobile);
 
@@ -12,6 +14,10 @@ const constraints = window.constraints = {
   audio: false,
   video: { width: 1280, height: 720 }
 };
+
+const sleep = (milliseconds) => {
+  return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
 
 class room extends Component {
   constructor(props) {
@@ -281,8 +287,14 @@ handleDevChange = event => {
 }
 
 // P1 - Open Player windown - future implemtation 
-openPlayer (){
-  window.open('/player', '_blank');
+openPlayer = async (e) => {
+  //window.open('/player', '_blank');
+  e.preventDefault()
+  console.log("e??", e, this.state.playURL)
+  const {playURL} = this.state
+  this.setState({showPlayer: false, playURL})
+  await sleep(10000)
+  this.setState({showPlayer: true})
 }
 
 // P2 - Player - external
@@ -290,6 +302,38 @@ playChannel = (e) => {
   e.preventDefault();
   this.setState({showPlayer: true})
 }
+
+// P3 - Player rendering
+playerShow = () => {
+  return (
+    <div>{<VideoPlayer { ...{
+      autoplay: true,
+      controls: true,
+      width: 640,
+      height: 360,
+      bigPlayButton: true,
+      //token: this.state.token,
+      cookie: "test",
+      sources: [{
+        //src: 'http://d2qohgpffhaffh.cloudfront.net/HLS/vanlife/withad/sdr_uncage_vanlife_admarker_60sec.m3u8',
+        src: this.state.playURL,
+        type: 'application/x-mpegURL',
+      }]
+    }}/>}</div>
+  );
+}
+
+//P3.1  - if not on air
+offAirshow = () => {
+  return (<div>
+    <img
+     width= "640"
+     height= "360"
+     alt="Off Air"
+     src={offAir}/>
+  </div>)
+}
+
 
 // S2 - Stop streaming to IVS
 stopStreaming = () => {
@@ -302,7 +346,7 @@ stopStreaming = () => {
 };
 
 //S1 - Start streaming to IVS
-startStreaming = (e) =>{
+startStreaming = async (e) =>{
   e.preventDefault();
   const {rtmpURL, streamKey, wsRef, mediaRecorder} = this.state;
   console.log("URL", rtmpURL, streamKey);
@@ -312,17 +356,19 @@ startStreaming = (e) =>{
     showComponent: true
   })
   let protocol = window.location.protocol.replace('http', 'ws');
-  let server = "//ivs-webrtc.hazel-rah.com"
+  let server = "//127.0.0.1:3004"
   // //d355h0s62btcyd.cloudfront.net
   let wsUrl = `${protocol}//${server}/rtmps/${rtmpURL}${streamKey}`;
   wsRef.current = new WebSocket(wsUrl);
   console.log("como esta o wsRef", wsRef)
 
-  wsRef.current.addEventListener('open', function open(data) {
+  wsRef.current.addEventListener('open', async function open(data) {
     console.log("Open!!!", data) /// set state need
+    this.setState({isConnected: true})
     if(data){
       console.log("!@@@@!!!")
-      this.setState({isConnected: true, isStreaming: true});
+      await sleep(25000);
+      this.setState({isStreaming: true, showPlayer: true});
       //console.log("State has been set to!!!")
     }
   }.bind(this));
@@ -354,7 +400,7 @@ startStreaming = (e) =>{
     console.log("reder has been called");
     console.log(this.state);
     document.body.style = 'background: #262626;';
-    const { showCam, videoin, audioin, audioout, stream, isConnected, isStreaming, playURL, errorMSG, apiResult, video} = this.state;
+    const { showCam, videoin, audioin, audioout, stream, isConnected, isStreaming, playURL, errorMSG, apiResult, showPlayer} = this.state;
     console.log("Tem Video IN???", videoin);
     if (videoin.length > 1){
       console.log("ShowCam", showCam);
@@ -362,7 +408,7 @@ startStreaming = (e) =>{
       this.enableCam()
       return (
         <div className="App">
-        <div className="container fluid" style={{backgroundColor: "#262626"}}>
+        <div className="container-fluid" style={{backgroundColor: "#262626"}}>
             <div className="headerPlayer">
               <h1>Simple IVS Streming</h1>
               {errorMSG && (<div className="errorMSG">
@@ -371,8 +417,10 @@ startStreaming = (e) =>{
                 </div>
               )}
             </div>
+            
+            <div className="container-fluid">
                 <div className="row">
-                <div className="col-md">
+                <div className="col-lg-6">
                   <form onSubmit={this.handleSubmit} class="form-control-select">
                       <select id="videoin" class="form-control" value={this.state.value} onChange={this.handleDevChange} >
                       <option disabled>Select Camera</option>
@@ -384,27 +432,47 @@ startStreaming = (e) =>{
                       {audioin.map((audioin) =>
                         <option key={audioin.id} value={audioin.id}>{audioin.label}</option>)}
                       </select>
-                      <select id="audioout" class="form-control" value={this.state.value} onChange={this.handleDevChange}>
-                      <option disabled>Select Audio Out</option>
-                      {audioout.map((audioout) =>
-                        <option key={audioout.id} value={audioout.id}>{audioout.label}</option>)}
-                      </select>
                     </form>
                 </div>
+                <div className="col-lg-6"> 
+                
+                <form className="form-control-select">
+                        <input 
+                        id="streamKey" 
+                        type="text"
+                        value={this.state.playURL}
+                        className="form-control-play" 
+                        onChange={e => this.setState({ playURL: e.target.value, isStreaming: false})}
+                        />
+                        <button type="submit" className="formBotPlay" onClick={this.openPlayer}>Play</button>
+                    </form>
+                </div>
+
               </div>
               <div className="row">
               
-                <div className="webcamBOX">
-                  <video autoPlay={true} muted={true} ref={stream} id="videoElement" controls></video>
+                <div className="col-lg-6">
+                  <div className="webcamBOX">
+                    <video autoPlay={true} muted={true} ref={stream} id="videoElement" controls></video>
+                  </div>
                 </div>
-        
                 
-              </div>        
+                <div className="col-lg-6"> 
+                  {showPlayer &&(<div className="playercamBOX">
+                    {this.playerShow()}
+                  </div>
+                  )}
+                  {!showPlayer && (<div className="playercamBOX">
+                    {this.offAirshow()}
+                  </div>)}
+                </div>
+                
+              </div>
+              </div>       
         <div className="player-wrapper"> 
           
         </div>
             <div className="row">
-            <div className="col-lg">
             {!isStreaming &&(
             <div className="form-group">
               <form className="form-URL">
@@ -433,18 +501,25 @@ startStreaming = (e) =>{
                         onChange={e => this.setState({ streamKey: e.target.value, showComponent: false})}
                         />
                         </label>
+                    {!isConnected && (
                     <div className="formLabel">
                       <button type="submit" className="formBot" onClick={this.startStreaming}>GoLive!</button>
                     </div>
+                    )}
+                    {isConnected && (
+                      <div className="formLabel">
+                        <button type="submit" className="formBotConecting">GoingOnAir</button>
+                      </div>
+                    )}
+
                 </form>
                 </div>
                 )}
                 {isStreaming &&(
-                  <div>
+                  <div className="form-group">
                     <button type="submit" className="formBotStop" onClick={this.stopStreaming}>StopStreaming!</button>
                   </div>
                 )}
-              </div>
             </div>
             <div className="DebugBOXger">
               <div className="DebugBOXtitle">
@@ -470,20 +545,6 @@ startStreaming = (e) =>{
               {isStreaming &&(
                   <div className="playerBOX">
                   <p className="formatText">Please Wait a few secs before trying to play the channel</p>
-                  <form className="form-Player">
-                  <label className="formLabel">
-                    PlayURL
-                        <input 
-                        id="streamKey" 
-                        type="text"
-                        value={this.state.playURL}
-                        className="formURLplayCh" 
-                        aria-label="Sizing example input" 
-                        aria-describedby="inputGroup-sizing-sm1"
-                        onChange={e => this.setState({ playURL: e.target.value, showComponent: false})}
-                        />
-                        </label>
-                    </form>
                   </div>
                 )}
               </div>
@@ -511,3 +572,13 @@ startStreaming = (e) =>{
 export default room;
 
 //    Open extrenal player    <button type="submit" className="formBot" onClick={this.openPlayer}>PlayChannel!</button>
+
+
+//Audio out
+/*
+<select id="audioout" class="form-control" value={this.state.value} onChange={this.handleDevChange}>
+                      <option disabled>Select Audio Out</option>
+                      {audioout.map((audioout) =>
+                        <option key={audioout.id} value={audioout.id}>{audioout.label}</option>)}
+                      </select>
+*/
