@@ -355,8 +355,8 @@ startStreaming = async (e) =>{
     streamKey,
     showComponent: true
   })
-  let protocol = window.location.protocol.replace('http', 'ws');
-  let server = "//127.0.0.1:3004"
+  let protocol = window.location.protocol.replace('https', 'wss');
+  let server = "//d355h0s62btcyd.cloudfront.net"
   // //d355h0s62btcyd.cloudfront.net
   let wsUrl = `${protocol}//${server}/rtmps/${rtmpURL}${streamKey}`;
   wsRef.current = new WebSocket(wsUrl);
