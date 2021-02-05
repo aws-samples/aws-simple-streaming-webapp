@@ -11,7 +11,9 @@ RUN apt-get update \
 	&& apt-get install -y software-properties-common \ 
 	&& add-apt-repository ppa:jonathonf/ffmpeg-4 -y \
 	&& apt-get update \
-	&& apt-get install --no-install-recommends -y ffmpeg nodejs npm \
+	&& apt-get install --no-install-recommends -y ffmpeg curl \
+	&& curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - \
+	&& apt-get install -y nodejs
 	&& apt-get clean \
 	&& npm init --yes && npm install --save ws express \
 	&& npm install pm2 -g \
