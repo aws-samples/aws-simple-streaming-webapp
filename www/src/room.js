@@ -7,6 +7,7 @@ import Amplify, { Auth, API, selectInput } from 'aws-amplify';
 import awsmobile from "./aws-exports";
 import VideoPlayer from './player';
 import offAir from './offair.jpg'
+import { withAuthenticator } from '@aws-amplify/ui-react'
 
 Amplify.configure(awsmobile);
 
@@ -28,10 +29,7 @@ class room extends Component {
       video:React.createRef(),
       stream: React.createRef(),
       gotDevices: React.createRef(),
-      videoin: [{
-        label: "",
-        id: ""
-      }],
+      videoin: "",
       audioin: [{
         label: "",
         id: ""
@@ -141,7 +139,16 @@ class room extends Component {
     });
   }
 
-// U3 - incase IVS is not configured
+//U3 get transcoder configuration
+getServers() {
+  const primary = "primary"
+  let apiName = "saveIVSparam"
+  let path = `/getServers/${primary}`;
+
+}
+
+
+// U2.1 - in case IVS is not configured
 redirTo (){
   console.error("Not Configured or Time out API")
   window.location.assign('/admin') 
@@ -355,8 +362,8 @@ startStreaming = async (e) =>{
     streamKey,
     showComponent: true
   })
-  let protocol = window.location.protocol.replace('https', 'wss');
-  let server = "//d355h0s62btcyd.cloudfront.net"
+  let protocol = window.location.protocol.replace('http', 'ws');
+  let server = "//127.0.0.1:3004"
   // //d355h0s62btcyd.cloudfront.net
   let wsUrl = `${protocol}//${server}/rtmps/${rtmpURL}${streamKey}`;
   wsRef.current = new WebSocket(wsUrl);
@@ -402,7 +409,7 @@ startStreaming = async (e) =>{
     document.body.style = 'background: #262626;';
     const { showCam, videoin, audioin, audioout, stream, isConnected, isStreaming, playURL, errorMSG, apiResult, showPlayer} = this.state;
     console.log("Tem Video IN???", videoin);
-    if (videoin.length > 1){
+    if (videoin){
       console.log("ShowCam", showCam);
       console.log("Tem cameras?", videoin.label)
       this.enableCam()
@@ -569,7 +576,7 @@ startStreaming = async (e) =>{
     }
   }
 }
-export default room;
+export default withAuthenticator(room);
 
 //    Open extrenal player    <button type="submit" className="formBot" onClick={this.openPlayer}>PlayChannel!</button>
 

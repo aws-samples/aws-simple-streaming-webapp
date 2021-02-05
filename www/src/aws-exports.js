@@ -16,6 +16,10 @@ const awsmobile = {
         {
             "tableName": "IVSparam-dev",
             "region": "us-east-1"
+        },
+        {
+            "tableName": "ISS-task-dns-track-dev",
+            "region": "us-east-1"
         }
     ],
     "aws_cloud_logic_custom": [

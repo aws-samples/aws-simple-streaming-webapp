@@ -8,7 +8,7 @@ import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import Room from './room';
 import RoomAdmin from './roomadm';
 import Amplify, { Auth } from 'aws-amplify';
-//import { withAuthenticator } from '@aws-amplify/ui-react'
+import { withAuthenticator } from '@aws-amplify/ui-react'
 import awsmobile from './aws-exports';
 
 Amplify.configure(awsmobile);
@@ -50,4 +50,4 @@ class App extends Component {
     );
   }
 }
-export default App;
+export default withAuthenticator(App);

@@ -32,10 +32,11 @@ WebRTC to RTMP
 - [X] Wait cam to be on on Admin Page
 - [X] Cam error treat
 - [ ] Stream error capture
+- [ ] API get server config, route and retry
 
 ### Server Side RTMP Relay
 - [X] Deploy version 1 of the server
-- [ ] optimize latency on ffmpeg
+- [-] optimize latency on ffmpeg
 - [ ] set auto deployment, use next or any otrer? aws ecs? talk to Jesus / Uriel
 - [ ] conteinerize
 - [ ] use the pm2 to scale the nodes in node js  (https://pm2.keymetrics.io/)

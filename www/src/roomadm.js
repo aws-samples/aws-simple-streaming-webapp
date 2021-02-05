@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import Amplify, { Auth, API } from 'aws-amplify';
 import './Adm.css';
 import awsmobile from "./aws-exports";
+import { withAuthenticator } from '@aws-amplify/ui-react'
 
 Amplify.configure(awsmobile);
 
@@ -82,6 +83,7 @@ class roomadm extends Component {
     e.preventDefault();
     console.log(e.target.value)
     console.log(this.state)
+    
     const username = this.state.username
     const rtmpURL = this.state.rtmpURL
     const streamKey = this.state.streamKey
@@ -112,6 +114,7 @@ class roomadm extends Component {
 
   gotoCam = async () => {
     // ask for en cam on browser
+    console.log("Constrainsts", constraints)
     try {
       await navigator.mediaDevices.getUserMedia(constraints);
       window.location.assign('/encam') 
@@ -224,5 +227,5 @@ class roomadm extends Component {
       )}
   }
 }
-export default roomadm;
+export default withAuthenticator(roomadm);
 
