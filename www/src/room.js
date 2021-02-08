@@ -30,15 +30,11 @@ class room extends Component {
       stream: React.createRef(),
       gotDevices: React.createRef(),
       videoin: "",
-      audioin: [{
-        label: "",
-        id: ""
-      }],
-      audioout: [{
-        label: "",
-        id: ""
-      }],
+      audioin: "",
+      audioout: "",
       errorMSG: "",
+      primaryServer: "",
+      secondaryServer: "", 
       apiResult: true,
       isConnected: false,
       isStreaming: false,
@@ -63,6 +59,7 @@ class room extends Component {
     };
     this.getCurrentUser()
     this.initFunc()
+    this.getServers()
   }
 
   componentDidMount() {
@@ -141,10 +138,21 @@ class room extends Component {
 
 //U3 get transcoder configuration
 getServers() {
-  const primary = "primary"
   let apiName = "saveIVSparam"
-  let path = `/getServers/${primary}`;
-
+  let path = `/getServers/`;
+  API.get(apiName, path).then(servers =>{
+    console.log("servers response", servers, servers.Items)
+    if (servers.Items.length === 0){
+      console.log("No servers")
+    } else {
+      console.log("There are", servers.Items[0].dns, servers.Items[1].dns)
+      this.state.primaryServer = servers.Items[0].dns
+      this.state.secondaryServer = servers.Items[1].dns
+    }
+  })
+  .catch(error => {
+    console.log(error);
+  });
 }
 
 
@@ -355,19 +363,45 @@ stopStreaming = () => {
 //S1 - Start streaming to IVS
 startStreaming = async (e) =>{
   e.preventDefault();
-  const {rtmpURL, streamKey, wsRef, mediaRecorder} = this.state;
-  console.log("URL", rtmpURL, streamKey);
+  const {rtmpURL, streamKey, wsRef, mediaRecorder, primaryServer, secondaryServer} = this.state;
+  console.log("SERVERS!", primaryServer, secondaryServer);
   this.setState({
     rtmpURL,
     streamKey,
     showComponent: true
   })
-  let protocol = window.location.protocol.replace('http', 'ws');
-  let server = "//127.0.0.1:3004"
+  let protocol = window.location.protocol.replace('https', 'wss');
+  let server = "//127.0.0.1:80"
+  let serverT = "//127.0.0.1:3004"
   // //d355h0s62btcyd.cloudfront.net
-  let wsUrl = `${protocol}//${server}/rtmps/${rtmpURL}${streamKey}`;
+  let wsUrl = `${protocol}//${primaryServer}/rtmps/${rtmpURL}${streamKey}`;
+  let wsUrlFal = `${protocol}//${secondaryServer}/rtmps/${rtmpURL}${streamKey}`;
+  
   wsRef.current = new WebSocket(wsUrl);
+  
   console.log("como esta o wsRef", wsRef)
+
+  // Fallback flow
+  wsRef.current.onerror = err => {
+    console.error("Got a error!!!", err)
+    console.log("Trying Server", wsUrlFal)
+
+
+    wsRef.current = new WebSocket(wsUrlFal);
+
+    wsRef.current.addEventListener('open', async function open(data) {
+      console.log("Open!!!", data) /// set state need
+      this.setState({isConnected: true})
+      if(data){
+        console.log("!@@@@!!!")
+        await sleep(25000);
+        this.setState({isStreaming: true, showPlayer: true});
+        //console.log("State has been set to!!!")
+      }
+    }.bind(this));
+
+  }
+
 
   wsRef.current.addEventListener('open', async function open(data) {
     console.log("Open!!!", data) /// set state need
@@ -380,7 +414,7 @@ startStreaming = async (e) =>{
     }
   }.bind(this));
   wsRef.current.addEventListener('close', () => {
-    this.stopStreaming();
+    //this.stopStreaming();
     this.setState({isConnected: false})
     console.log("Closed!!!") /// set state need
   });
