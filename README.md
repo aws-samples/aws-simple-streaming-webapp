@@ -3,7 +3,7 @@
 Reference code and solution to simplify the live streaming by using the browser APIs and webRTC to capture the video.
 The solution is based on small, idependent and decoupled blocks to capture cameras and transwrap it to RTMP 
 
-![Application Frontend] (doc/front.png)
+<img src="doc/front.png" alt="Application Frontend" />
 
 ## Solution Architecture
 
@@ -64,11 +64,11 @@ This Command will deploy the following resources in your account:
 #### 4. Application Configuration
 In your local envirolment http://127.0.0.1:3000 the following application will be loaded
 
-![IVS Parameters] (doc/IVSParam.png)
+<img src="doc/IVSParam.png" alt="IVS Parameters" />
 
 Go to [Amazon Interactive Video Service Console](https://console.aws.amazon.com/ivs/) and copy the parameters to add in the Simple Streaming Solution.
 
-![Copy Parameters] (doc/IVSCopy.png)
+<img src="doc/IVSCopy.png" alt="Copy Parameters" />
 
 Add into the Simple Streaming Solution and Save!
 
@@ -82,17 +82,17 @@ a. Go to [Amazon Interactive Video Service Console](https://console.aws.amazon.c
 b. Create your IVS Channel
 In simple two steps:
 
-![IVS Parameters] (doc/IVSCreateChannel_1.png)
-![IVS Parameters] (doc/IVSCreateChannel_2.png)
+<img src="doc/IVSCreateChannel_1.png" alt="IVS Parameters" />
+<img src="doc/IVSCreateChannel_2.png" alt="IVS Parameters" />
 
 Finally copy the IVS parameters and add to the interface.
-![Copy Parameters] (doc/IVSCopy.png)
+<img src="doc/IVSCopy.png" alt="Copy Parameters" />
 
 #### 5. Test your live streaming from your browser
 
 Select your prefered camera and audio input and click on Go Live!
 
-![You Are Live] (doc/ISSSLive.png)
+<img src="doc/ISSSLive.png" alt="You Are Live" />
 
 ## References and useful links
 
