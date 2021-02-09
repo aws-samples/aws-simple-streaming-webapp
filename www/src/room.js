@@ -33,6 +33,7 @@ class room extends Component {
       audioin: "",
       audioout: "",
       errorMSG: "",
+      degugMSG: "Waiting connection...",
       primaryServer: "",
       secondaryServer: "", 
       apiResult: true,
@@ -357,7 +358,7 @@ stopStreaming = () => {
     mediaRecorder.current.stop();
     wsRef.current.close();
   }
-  this.setState({isStreaming: false, isConnected: false, showPlayer: false});
+  this.setState({isStreaming: false, isConnected: false, showPlayer: false, degugMSG: "Waiting connection..."});
 };
 
 //S1 - Start streaming to IVS
@@ -371,7 +372,7 @@ startStreaming = async (e) =>{
     showComponent: true
   })
   let protocol = window.location.protocol.replace('https', 'wss');
-  let server = "//127.0.0.1:80"
+  let server = "//127.0.0.1:3004"
   let serverT = "//127.0.0.1:3004"
   // //d355h0s62btcyd.cloudfront.net
   let wsUrl = `${protocol}//${primaryServer}/rtmps/${rtmpURL}${streamKey}`;
@@ -402,6 +403,11 @@ startStreaming = async (e) =>{
 
   }
 
+  wsRef.current.onmessage = evt =>{
+    console.log("MSG!!", evt)
+    this.setState({degugMSG: evt.data})
+  }
+
 
   wsRef.current.addEventListener('open', async function open(data) {
     console.log("Open!!!", data) /// set state need
@@ -414,7 +420,7 @@ startStreaming = async (e) =>{
     }
   }.bind(this));
   wsRef.current.addEventListener('close', () => {
-    //this.stopStreaming();
+    //this.stopStreaming(); ///////////////TEM que voltar o stop e tratar cada server individualmente
     this.setState({isConnected: false})
     console.log("Closed!!!") /// set state need
   });
@@ -446,7 +452,10 @@ startStreaming = async (e) =>{
     if (videoin){
       console.log("ShowCam", showCam);
       console.log("Tem cameras?", videoin.label)
-      this.enableCam()
+      if(!this.state.camison){
+        this.enableCam()
+        this.setState({camison: true})
+      }
       return (
         <div className="App">
         <div className="container-fluid" style={{backgroundColor: "#262626"}}>
@@ -578,18 +587,17 @@ startStreaming = async (e) =>{
                       <td>{String(isConnected)}</td>
                     </tr>
                     <tr>
-                      <th>Streaming:</th>
-                      <td>{String(isStreaming)}</td>
+                      <th>Servers:</th>
+                      <td>1=({this.state.primaryServer}) 2=({this.state.secondaryServer})</td>
+                    </tr>
+                    <tr>
+                      <th>Debug MSG:</th>
+                      <td>{String(this.state.degugMSG)}</td>
                     </tr>
                   </tbody>
               </table>
-              {isStreaming &&(
-                  <div className="playerBOX">
-                  <p className="formatText">Please Wait a few secs before trying to play the channel</p>
-                  </div>
-                )}
               </div>
-            </div>         
+            </div> 
             </div>
         </div>
       );
