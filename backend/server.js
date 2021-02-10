@@ -1,22 +1,22 @@
 /// int version
-// based on https://github.com/fbsamples/Canvas-Streaming-Example
+// code based on https://github.com/fbsamples/Canvas-Streaming-Example
 
 
 const child_process = require('child_process'); // To be used later for running FFmpeg
 const express = require('express');
-const http = require('http');
+const http = require('https');
+const fs = require('fs')
 const WebSocketServer = require('ws').Server;
 
-//const fs = require('fs');
-
-//const options = {
-//	key: fs.readFileSync('key.pem'),
-//	cert: fs.readFileSync('cert.pem')
-//};
-
 const app = express();
-const port = 80
-const server = http.createServer(app).listen(port, () => {
+const port = 443
+
+const options = {
+  key: fs.readFileSync('key.pem'),
+  cert: fs.readFileSync('cert.pem')
+};
+
+const server = http.createServer(options, app).listen(port, () => {
   console.log('Listening on port...',port);
 });
 
@@ -35,11 +35,12 @@ app.use(express.static(__dirname + '/www'));
 wss.on('connection', (ws, req) => {
 
     console.log('Connection Received!!!', req.url);
-    ws.send('Hi there!');
+    ws.send('Connected to server');
 
     let match;
     if ( !(match = req.url.match(/^\/rtmps\/(.*)$/)) ) {
       console("is not RTMPS", req.url)
+      ws.send('ERROR, Not a RTMP Connection');
       ws.terminate(); // No match, reject the connection.
       return;
     }
@@ -90,6 +91,7 @@ wss.on('connection', (ws, req) => {
     // If FFmpeg stops for any reason, close the WebSocket connection.
     ffmpeg.on('close', (code, signal) => {
       console.log('FFmpeg child process closed, code ' + code + ', signal ' + signal);
+      ws.send('Closing Socket');
       ws.terminate();
     });
 
@@ -97,12 +99,15 @@ wss.on('connection', (ws, req) => {
     // These errors most commonly occur when FFmpeg closes and there is still
     // data to write.  If left unhandled, the server will crash.
     ffmpeg.stdin.on('error', (e) => {
+      ws.send(e);
       console.log('FFmpeg STDIN Error', e);
+      ws.terminate();
     });
 
     // FFmpeg outputs all of its messages to STDERR.  Let's log them to the console.
     ffmpeg.stderr.on('data', (data) => {
       console.log('FFmpeg STDERR:', data.toString());
+      ws.send(data.toString());
     });
 
     // When data comes in from the WebSocket, write it to FFmpeg's STDIN.

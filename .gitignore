@@ -11,6 +11,7 @@
 # testing
 /coverage
 server2.js
+server3.js
 
 # production
 /build
