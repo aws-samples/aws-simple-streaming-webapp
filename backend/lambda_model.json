@@ -1,0 +1,10 @@
+{
+    "FunctionName": "ivs-ip-register",
+    "Runtime": "python3.8",
+    "Role": "arn:aws:iam::862418150245:role/service-role/ivs-ip-register-role-992spxkd",
+    "Handler": "lambda_function.lambda_handler",
+    "Description": "",
+    "Timeout": 3,
+    "MemorySize": 128
+}
+
