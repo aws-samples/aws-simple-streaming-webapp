@@ -43,13 +43,123 @@ For building the transraping container you will need to perform steps to prepare
 Our containers will be running in AWS Fargate and our automation will be done by AWS Lambda. Both of these resource will require roles to run and perform actions against other AWS services.
 
 ```
-# This will create the ECS exectutions role that we will be using on our ECS container.
+# This will create the ECS exectution role that we will be using on our ECS container.
 
-aws iam create-role --role-name ivs-ecs-execution-role --assume-role-policy-document file://ivs_ecs_trust_policy.json | jq '.Role.Arn' | sed 's/"//g' > ivs_ecs_execution_role_arn.txt
+aws iam create-role --role-name ivs-ecs-execution-role \
+--assume-role-policy-document file://ivs_ecs_trust_policy.json \
+| jq '.Role.Arn' | sed 's/"//g' > ivs_ecs_execution_role_arn.txt
 
 # This will attached the required policies on ecs execution role we have just created. 
 
-aws iam attach-role-policy --role-name ivs-lambda-role --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy && aws iam attach-role-policy --role-name ivs-lambda-role --policy-arn arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs
+aws iam attach-role-policy --role-name ivs-lambda-role \
+--policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy \
+&& aws iam attach-role-policy --role-name ivs-lambda-role \
+--policy-arn arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs
+
+# This will create AWS Lambda execution role that we will be using to let lambda access AWS resources.
+
+aws iam create-role --role-name ivs-lambda-role \
+--assume-role-policy-document file://ivs_lambda_trust_policy.json
+
+# This will attached the required policies on lambda execution role we have just created. 
+
+aws iam attach-role-policy --role-name ivs-lambda-role \
+--policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole \
+&& aws iam attach-role-policy --role-name ivs-lambda-role \
+--policy-arn arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess \
+&& aws iam attach-role-policy --role-name ivs-lambda-role \
+--policy-arn $(aws iam create-policy --policy-name ivs_dynamodb \
+--policy-document file://ivs_lambda_dynamodb_policy.json \
+| jq '.Policy.Arn' | sed 's/"//g' > lambda_policy_arn.txt \
+&& cat lambda_policy_arn.txt)
+
+```
+
+#### 2. Creating the AWS Lambda funtion
+
+```
+# This will create the lambda.json file with the right AWS Lambda Execution role
+
+lambda_role_aarn=$(cat lambda_policy_arn.txt) \
+&& jq --arg v "$lambda_role_arn" '. |= . + {"Role":$v}' \
+lambda_model.json > lambda.json
+
+# This will create the ivs-ip-register lambda function
+
+aws lambda create-function --cli-input-json file://create_labmda.json \
+--zip-file fileb://lambda.zip
+
+```
+
+#### 3. Creating the Amazon DynamoDB table
+
+```
+# This will create the Amazon DynamoDB ivs-task-dns-track table.
+
+aws dynamodb create-table --cli-input-json file://dynamodb_table.json
+
+```
+#### 4. Creating the Security Group that will be used in our Amazon ECS Service
+
+```
+# This will create the ivs-sg security group in your default vpc
+
+aws ec2 create-security-group --group-name ivs-sg \
+--description "IVS WetRTC Security Group" --vpc-id $(aws ec2 describe-vpcs \
+| jq '.Vpcs[] | select(.IsDefault)' | jq '.VpcId' | sed 's/"//g') \
+| jq '.GroupId' | sed 's/"//g' > ivs_sg.txt && while read line; \
+do aws ec2 authorize-security-group-ingress --group-id $(cat ivs_sg.txt) \
+--protocol tcp --port $line --cidr 0.0.0.0/0; done < ivs_ports.txt
+
+```
+
+#### 5. Creating the Amazon ECS Cluster, task definitions and service
+
+```
+# This will create the Amazon ECS Cluster named ivs.
+
+aws ecs create-cluster --cluster-name ivs
+
+# This will automatically adjust the ivs_task_definition.json file with the correct Amazon ECS execution role
+
+ecs_role_aarn=$(cat ivs_ecs_execution_role_arn.txt) \
+&& jq --arg v "$lambda_role_arn" '. |= . + {"Role":$v}' \
+ivs_task_definition_model.json > ivs_task_definition.json
+
+# This will create the Amazon ECS Task Definition named ivs-webrtc
+
+aws ecs register-task-definition --cli-input-json file://ivs_task_definition.json
+
+# This will select the proper subnets from your default vpc to be used by Amazon ECS Service.
+
+aws ec2 describe-subnets --filter Name=vpc-id,Values=$(aws ec2 describe-vpcs \
+| jq '.Vpcs[] | select(.IsDefault)' | jq '.VpcId' | sed 's/"//g') \
+--query 'Subnets[?MapPublicIpOnLaunch==`true`].SubnetId' \
+| sed -e '/^$/d;:a;N;$!ba;s/\n//g;s/ //g;s/[][]//g;s/.$//;s/^.//' > my_subnets.txt
+
+# This will automatically create the ivs_ecs_service.json
+
+declare -a store_subnets=$(cat my_subnets.txt) \
+&& jq --arg v "$store_subnets" '.networkConfiguration.awsvpcConfiguration \
+|= . + {"subnets":[$v]}' ecs_services_model.json \
+| sed -e 's/\\//g' | jq . > ivs_ecs_service.json
+
+# This will create the ivs-webrtc Amazon ECS Service
+
+aws ecs create-service --cli-input-json file://ivs_ecs_service.json
+
+```
+#### 6. Creating the Amazon EventBridge Rule
+
+```
+# This...
+
+```
+
+#### 7. Adjusting the Amazon ECS Service to two tasks per service
+
+```
+# This...
 
 ```
 
