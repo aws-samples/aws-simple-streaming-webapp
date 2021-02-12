@@ -146,7 +146,8 @@ declare -a store_subnets=$(cat my_subnets.txt) \
 
 # This will create the ivs-webrtc Amazon ECS Service
 
-aws ecs create-service --cli-input-json file://ivs_ecs_service.json
+aws ecs create-cluster --cluster-name ivs \
+| jq '.cluster.clusterArn' | sed 's/"//g' > ecs_cluster_arn.txt
 
 ```
 #### 6. Creating the Amazon EventBridge Rule
