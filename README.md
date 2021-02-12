@@ -42,38 +42,49 @@ For building the transraping container you will need to perform steps to prepare
 
 Our containers will be running in AWS Fargate and our automation will be done by AWS Lambda. Both of these resource will require roles to run and perform actions against other AWS services.
 
-```
-# This will create the ECS exectution role that we will be using on our ECS container.
+##### 1.1 Create the Amazon ECS execution role that will be used on our ECS Container.
 
+```
 aws iam create-role --role-name ivs-ecs-execution-role \
 --assume-role-policy-document file://ivs_ecs_trust_policy.json \
-| jq '.Role.Arn' | sed 's/"//g' > ivs_ecs_execution_role_arn.txt
+| jq '.Role.Arn' | sed 's/"//g' > ./temp_files/ivs_ecs_execution_role_arn.txt
 
-# This will attached the required policies on ecs execution role we have just created. 
+```
 
+##### 1.2 Attach the required policies to Amazon ECS execution role you just created.
+
+```
 aws iam attach-role-policy --role-name ivs-lambda-role \
 --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy \
 && aws iam attach-role-policy --role-name ivs-lambda-role \
 --policy-arn arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs
 
-# This will create AWS Lambda execution role that we will be using to let lambda access AWS resources.
+```
 
+##### 1.3 Create the AWS Lambda execution role that will allow lambda to access the required AWS resources.
+
+```
 aws iam create-role --role-name ivs-lambda-role \
---assume-role-policy-document file://ivs_lambda_trust_policy.json
+--assume-role-policy-document file://json_configs/ivs_lambda_trust_policy.json
 
-# This will attached the required policies on lambda execution role we have just created. 
+```
 
+##### 1.4 Attach the required policies to AWS Lambda execution role you just created.
+
+```
 aws iam attach-role-policy --role-name ivs-lambda-role \
 --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole \
 && aws iam attach-role-policy --role-name ivs-lambda-role \
 --policy-arn arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess \
 && aws iam attach-role-policy --role-name ivs-lambda-role \
 --policy-arn $(aws iam create-policy --policy-name ivs_dynamodb \
---policy-document file://ivs_lambda_dynamodb_policy.json \
-| jq '.Policy.Arn' | sed 's/"//g' > lambda_policy_arn.txt \
-&& cat lambda_policy_arn.txt)
+--policy-document file://json_configs/ivs_lambda_dynamodb_policy.json \
+| jq '.Policy.Arn' | sed 's/"//g' > ./temp_files/lambda_policy_arn.txt \
+&& cat /temp_files/lambda_policy_arn.txt)
 
 ```
+
+######### CONTINUE FROM HERE
 
 #### 2. Creating the AWS Lambda funtion
 
