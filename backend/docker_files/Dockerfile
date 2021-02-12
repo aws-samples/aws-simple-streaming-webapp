@@ -12,8 +12,8 @@ RUN apt-get update \
 	&& add-apt-repository ppa:jonathonf/ffmpeg-4 -y \
 	&& apt-get update \
 	&& apt-get install --no-install-recommends -y ffmpeg curl \
-	&& curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - \
-	&& apt-get install -y nodejs
+	&& curl -sL https://deb.nodesource.com/setup_14.x | bash - \
+	&& apt-get install -y nodejs \
 	&& apt-get clean \
 	&& npm init --yes && npm install --save ws express \
 	&& npm install pm2 -g \
@@ -24,7 +24,7 @@ RUN apt-get update \
 EXPOSE 80
 
 # Copy server.js to /opt/ivs-simple-webrtc folder
-COPY ../server.js /opt/ivs-simple-webrtc/
+COPY server.js /opt/ivs-simple-webrtc/
 COPY health-check.html /opt/ivs-simple-webrtc/www/
 
 # Start webserver
