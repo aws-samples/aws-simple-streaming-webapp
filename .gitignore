@@ -3,19 +3,21 @@
 # dependencies
 /node_modules
 /amplify
-/www/node_modules
-/www/amplify
+/frontend/node_modules
+/frontend/amplify
 /.pnp
 .pnp.js
 
 # testing
 /coverage
-server2.js
-server3.js
+/frontend/.vscode
+/frontend/js
+/frontend/index.html
+
 
 # production
 /build
-/www/build
+/frontend/build
 
 # misc
 .DS_Store

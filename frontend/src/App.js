@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: MIT-0
 
 import React, { Component } from 'react';
-import './App.css';
 import logo from './img/aws.png';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
-import Room from './room';
-import RoomAdmin from './roomadm';
+import Stream from './components/stream';
+import Home from './components/home';
 import Amplify, { Auth } from 'aws-amplify';
 import { withAuthenticator } from '@aws-amplify/ui-react'
 import awsmobile from './aws-exports';
@@ -39,8 +38,8 @@ class App extends Component {
           </nav>
           <hr />
           <Switch>
-              <Route exact path='/' component={RoomAdmin} />
-              <Route exact path='/encam' component={Room}/>
+              <Route exact path='/' component={Home} />
+              <Route exact path='/encam' component={Stream}/>
           </Switch>
           <div>
            </div>

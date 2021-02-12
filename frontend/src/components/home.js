@@ -3,8 +3,8 @@
 
 import React, { Component } from 'react';
 import Amplify, { Auth, API } from 'aws-amplify';
-import './Adm.css';
-import awsmobile from "./aws-exports";
+import './home.style.scss';
+import awsmobile from "../aws-exports";
 import { withAuthenticator } from '@aws-amplify/ui-react'
 
 Amplify.configure(awsmobile);
@@ -18,25 +18,22 @@ class roomadm extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      user: "",
-      username: "",
-      rtmpURL: "",
-      streamKey: "",
-      playURL: "",
-      errorMSG: "",
+      user: null,
+      username: null,
+      rtmpURL: null,
+      streamKey: null,
+      playURL: null,
+      errorMSG: null,
       apiResult: false,
       showSuccess: false
     };
-    //this.handleURLset = this.handleURLset.bind(this);
   }
 
   componentDidMount() {
     this.getCurrentUser()
   }
 
-  componentWillUnmount() {
-  }
-
+  //U1- get USER from cognito
   getCurrentUser() {
     Auth.currentAuthenticatedUser({ bypassCache: true }).then(user => {
       console.log(user);
@@ -49,8 +46,7 @@ class roomadm extends Component {
     }); 
   };
 
-  //get IVS Params
-  
+  //U2- get IVS Params
   getStream() {
     const {username} = this.state;
     console.log("tem valor aqui??", username, this.state.username)
@@ -78,7 +74,7 @@ class roomadm extends Component {
   }
 
 
-  // store IVS params  
+  //U3- post store IVS params  
   storeStream = e => {
     e.preventDefault();
     console.log(e.target.value)
@@ -96,9 +92,6 @@ class roomadm extends Component {
         rtmpURL,
         streamKey,
         playURL
-      },
-      headers: {
-          //"Access-Control-Allow-Origin": "my-origin.com"
       }
     };
     API.post(apiName, path, data)
@@ -112,8 +105,8 @@ class roomadm extends Component {
       });
   }
 
+  //C1- get CAMAERAS
   gotoCam = async () => {
-    // ask for en cam on browser
     console.log("Constrainsts", constraints)
     try {
       await navigator.mediaDevices.getUserMedia(constraints);
@@ -124,6 +117,7 @@ class roomadm extends Component {
       }
   }
 
+  //C2- cameras ERROR handling
   handleError(error) {
     if (error.name === 'ConstraintNotSatisfiedError') {
       const v = constraints.video;
@@ -142,28 +136,24 @@ class roomadm extends Component {
   render() {
     document.body.style = 'background: #262626;';
     const {showSuccess, username, apiResult, isConfigured, errorMSG} = this.state;
-    if (!username || !apiResult){return (<div className="loading">loading configuration...</div>)}
+    if (!username || !apiResult){return (<div className="loadingData">loading configuration...</div>)}
     else {
       return (
         <div>
           <div className="container fluid" style={{backgroundColor: "#262626"}}>
               <div className="headerPlayer">
-                <h1 className="title">Simple IVS Streming</h1>
+                <h1>Simple IVS Streming</h1>
               </div>
           </div>
-          <div className="EnCamBOX">
-            <div className="textForm">
-              <p className="welcome">Welcome {username}</p>
+          <div className="enCamera">
+            <div>
+              <p>Welcome {username}</p>
               <p>This is a simple webRTC broadcast Sample Demo. Amazon Interactive Video Service, for more details please contact <a href="https://phonetool.amazon.com/users/osmarb">osmarb@</a></p>
             </div>
-            <div>
-              {isConfigured && (
-                  <div className="botForm">
-                    <button type="submit" className="enableCam" onClick={this.gotoCam}>Enable Cam!</button>
-                  </div>
+              {isConfigured && (  
+                <button className="buttonEncam" type="submit" onClick={this.gotoCam}>Enable Cam!</button>
               )}
-            </div>
-          </div>
+           </div>
               {!isConfigured && (
                   <div>
                     <p className="configFirst">Please configure the IVS paramerters before proceeding:</p>
@@ -173,6 +163,7 @@ class roomadm extends Component {
                 <p>Please enable your Camera, check browser Permissions.</p>
                 <p>Error: {errorMSG}</p>
                 </div>)}
+            
         <div className="textFormivs">
           <div className="form-ivs">
               <form className="form-URL">
@@ -195,7 +186,7 @@ class roomadm extends Component {
                         <input 
                         id="streamKey" 
                         type="password"
-                        className="formURLplay"
+                        className="formURL"
                         value={this.state.streamKey}
                         aria-label="Sizing example input" 
                         aria-describedby="inputGroup-sizing-sm1"
