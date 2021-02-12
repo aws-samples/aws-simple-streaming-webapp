@@ -11,7 +11,19 @@ The solution is based on small, idependent and decoupled blocks to capture camer
 
 ### Pre-requeriments
 
-For deploying the transwrap container, we will need to install AWS Cli (Install AWS Cli (https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html))
+For deploying the transwrap container, we will need to install AWS Cli (Install AWS Cli (https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)) and the jq tool. 
+
+``` 
+# If you are using Mac OS, do:
+brew install jq
+
+# If you are using Amazon Linux, do:
+yum install jq
+
+# If you are using Ubuntu Linux, do:
+apt-get install jq
+
+```
 
 For building the integration with AWS components and host our web application we will be using AWS Amplify. 
 For more complete steps of installing and configure AWS Amplify please visit the documentation (Amplify Documentation (https://docs.amplify.aws/start/getting-started/installation/q/integration/react#option-2-follow-the-instructions) for React). 
@@ -24,6 +36,22 @@ For more complete steps of installing and configure AWS Amplify please visit the
 
 ### A- Backend: Transwraping container ECS 
 
+For building the transraping container you will need to perform steps to prepare your AWS environment (roles, policies and the AWS resources to support the backend). 
+
+#### 1. Creating the roles and policies
+
+Our containers will be running in AWS Fargate and our automation will be done by AWS Lambda. Both of these resource will require roles to run and perform actions against other AWS services.
+
+```
+# This will create the ECS exectutions role that we will be using on our ECS container.
+
+aws iam create-role --role-name ivs-ecs-execution-role --assume-role-policy-document file://ivs_ecs_trust_policy.json | jq '.Role.Arn' | sed 's/"//g' > ivs_ecs_execution_role_arn.txt
+
+# This will attached the required policies on ecs execution role we have just created. 
+
+aws iam attach-role-policy --role-name ivs-lambda-role --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy && aws iam attach-role-policy --role-name ivs-lambda-role --policy-arn arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs
+
+```
 
 ### B- Frontend and APIS: webRTC video capture 
 
