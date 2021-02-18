@@ -78,6 +78,13 @@ a {
     margin-bottom: 3px;
 }
 
+.saved {
+    color: greenyellow;
+    margin:auto;
+    text-align: center; 
+    padding:auto;  
+}
+
 .textFormivs{ 
     display:flex;  
     font-size:20px;  
@@ -90,3 +97,4 @@ a {
     .formBot{ display:flex;  background-color:#00b7ff;  border:none;  color:white;  padding:10px 30px 10px;  margin-top:1000px;  margin:8px;  display:inline-block;  font-size:16px;  height:40px;  border-radius:8px}
 
 }
+

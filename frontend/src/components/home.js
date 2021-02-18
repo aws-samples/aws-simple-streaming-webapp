@@ -5,7 +5,6 @@ import React, { useEffect, useState } from 'react';
 import Amplify, { API } from 'aws-amplify';
 import './home.style.scss';
 import awsmobile from "../aws-exports";
-import Test from './Test';
 import  { useHistory, withRouter } from 'react-router-dom'
 
 
@@ -20,12 +19,11 @@ const constraints = window.constraints = {
 function Home (props) {
 
   const username = props.username;
-  const [rtmpURL, setRtmpURL] = useState(null);
-  const [streamKey, setStreamKey] = useState(null);
-  const [playURL, setPlayURL] = useState(null);
-  const [errorMSG, setErrorMSG] = useState(null);
-  const [apiResult, setApiResult] = useState(null);
-  const [showSuccess, isShowSuccess]= useState(false);
+  const [rtmpURL, setRtmpURL] = useState('');
+  const [streamKey, setStreamKey] = useState('');
+  const [playURL, setPlayURL] = useState('');
+  const [errorMSG, setErrorMSG] = useState('');
+  const [apiResult, setApiResult] = useState();
   const [configured, isConfigured] = useState(false);
   const [saved, isSaved] = useState(false);
 
@@ -76,7 +74,7 @@ function Home (props) {
     API.post(apiName, path, data)
       .then(response => {
         console.log("A resta é", response)
-        isSaved(true) // antigo  this.setState({showSuccess: true});
+        isSaved(true) 
         getStream();
       })
       .catch(error => {
@@ -140,11 +138,11 @@ function Home (props) {
               <p>Welcome {username}</p>
               <p>This is a simple webRTC broadcast Sample Demo. Amazon Interactive Video Service, for more details please contact <a href="https://phonetool.amazon.com/users/osmarb">osmarb@</a></p>
             </div>
-              {isConfigured && (  
+              {configured | apiResult && (  
                 <button className="buttonEncam" type="submit" onClick={gotoCam}>Enable Cam!</button>
               )}
            </div>
-              {!isConfigured && (
+              {!configured && (
                   <div>
                     <p className="configFirst">Please configure the IVS paramerters before proceeding:</p>
                   </div>
@@ -153,6 +151,7 @@ function Home (props) {
                 <p>Please enable your Camera, check browser Permissions.</p>
                 <p>Error: {errorMSG}</p>
                 </div>)}
+              {saved && ( <div className="saved">Channel has been saved for user {username}</div>)}
             
         <div className="textFormivs">
           <div className="form-ivs">
@@ -202,7 +201,7 @@ function Home (props) {
                       </div>
                 </form>
                 </div>
-                {showSuccess && ( <div className="saved">Channel has been saved for user {username}</div>)}
+               
       </div>
       </div>
       )}
