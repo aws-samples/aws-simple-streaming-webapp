@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 // branch with player
 
-import React, { Component } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import './stream.style.scss'
 import Amplify, { Auth, API} from 'aws-amplify';
 import awsmobile from "../aws-exports";
@@ -12,119 +12,111 @@ import { withAuthenticator } from '@aws-amplify/ui-react'
 
 Amplify.configure(awsmobile);
 
-const constraints = window.constraints = {
-audio: false,
-video: { width: 1280, height: 720 }
-};
+//const constraints = window.constraints = {
+//audio: false,
+//video: { width: 1280, height: 720 }
+//};
 
 const sleep = (milliseconds) => {
 return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 
-class room extends Component {
-constructor(props) {
-  super(props);
-  this.vidRef = React.createRef();
-  this.state = {
-    username: null,
-    video:React.createRef(),
-    stream: React.createRef(),
-    gotDevices: React.createRef(),
-    videoin: null,
-    audioin: null,
-    audioout: null,
-    errorMSG: null,
-    degugMSG: "Waiting connection...",
-    primaryServer: null,
-    secondaryServer: null, 
-    apiResult: true,
-    isConnected: false,
-    isStreaming: false,
-    showPlayer: false,
-    showCam: false,
-    nameCanv: React.createRef(),
-    wsRef: React.createRef(),
-    mediaRecorder: React.createRef(),
-    requestAnimationRef: React.createRef(),
-    showencam: true,
-    setCameraEnabled: false,
-    rtmpURL: null,
-    streamKey: {},
-    playURL: {},
-    showComponent: true,
-  };
-  this.getCurrentUser()
-  this.initFunc()
-  this.getServers()
-}
+function Streampage(props) {
 
-componentDidMount() {
-  this.start()
-}
+  // declare consts
 
-// C1 - init CAM
-initFunc = async () =>{
-  //get camera stated and enum devices
-  try{
-    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-    const gotDevices = await navigator.mediaDevices.enumerateDevices()
-    this.handleList(gotDevices, mediaStream);
-    //
-  } catch (error) {
-    this.handleError(error);
-  }
-}
+
+
+const username = props.username;
+const video = useRef();
+const stream = useRef();
+const [vDevID, setVDevID] = useState("");
+const [aDevID, setADevID] = useState("");
+const [devices, setDevices] = useState({videoin:null, audioin:null, audioout:null})
+const [status, setStatus] = useState({isConnected:false, isStreaming:false, isShowPlayer:false, setdebugMSG:"Waiting connection...", setAlertFromServers:null})
+const [errorMSG, setErrorMSG] = useState(null);
+//const [debugMSG, setdebugMSG] = useState("Waiting connection...");
+//const [alertFromServers, setAlertFromServers] = useState(null);
+const [primaryServer, setPrimaryServer] = useState(null);
+const [secondaryServer, setSecondaryServer] = useState(null) ;
+const apiResult = useState(null);
+//const [connected, isConnected] = useState(null);
+//const [streaming, isStreaming] = useState(false);
+const [showPlayer, isShowPlayer] = useState(false)
+const [showCam, isShowCam]= useState(false)
+const wsRef = useRef();
+const mediaRecorder = useRef();
+const requestAnimationRef = useRef();
+//const constraints = window.constraints = {audio: false, video: { width: 1280, height: 720 }}; // remover a resoluçao
+const constraints = { audio: {autoplay: true, deviceId: aDevID}, video: { width: 1280, height: 720, deviceId: vDevID } };
+
+
+
+
+const [cameraEnabled, isCameraEnabled] = useState(false)
+
+// check if has values before define, if undefined redir to home
+const rtmpURL = props.location.state.rtmpURL
+const streamKey = props.location.state.streamKey
+const playURL= props.location.state.playURL
+const [showComponent, isShowComponent] = useState(true)
+
+
+
+useEffect(()=>{
+  (async function() {
+    // C1 - init CAM
+    try { 
+      //const constraints = { audio: {autoplay: true, deviceId: aDevID}, video: { width: 1280, height: 720, deviceId: vDevID } };
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      const gotDevices = await navigator.mediaDevices.enumerateDevices()
+      handleList(gotDevices, mediaStream);
+      
+    } catch (e) {
+        console.error('Device Error' , e);
+        handleError(e);
+    }
+})();
+  console.log('component mounted!')
+},[vDevID, aDevID])
 
 // C2 - list Cameras
-handleList (gotDevices) {
-  let videoin = []
-  let audioin = []
-  let audioout = []
-  gotDevices.forEach(function(gotDevice) {
-    if (gotDevice.kind === 'videoinput'){
-      //console.log("video", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
-      videoin.push({label: gotDevice.label, id: gotDevice.deviceId})
-    }
+const handleList = (gotDevices) => {
+  console.log("List Cam", gotDevices.length)
+  let vidin = [];
+  let auin = [];
+  let audioOut = [];  
+  gotDevices.forEach(function (gotDevice) {
+    console.log("retorno do for each")
+    let i = 0 
     if (gotDevice.kind === 'audioinput'){
       //console.log("audioin", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
-      audioin.push({label: gotDevice.label, id: gotDevice.deviceId})
-    }
-    if (gotDevice.kind === 'audiooutput'){
-      //console.log("audioout", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
-      audioout.push({label: gotDevice.label, id: gotDevice.deviceId})
-    }
+      auin.push({label: gotDevice.label, id: gotDevice.deviceId, len:i++})
+    } else if (gotDevice.kind === 'videoinput'){
+      //console.log("video", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
+      vidin.push({label: gotDevice.label, id: gotDevice.deviceId})
+    } else if (gotDevice.kind === 'audiooutput'){
+      //console.log("audioout??", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
+      audioOut.push({label: gotDevice.label, id: gotDevice.deviceId})
+    } else {console.log('Some other kind of source/device: ', gotDevice);}
   })
-
-  this.state.videoin = videoin
-  this.state.audioin = audioin
-  this.state.audioout = audioout 
+  console.log("Como esta aqui??", vidin, auin, audioOut)
+  setDevices({audioin:auin, videoin:vidin, audioout:audioOut})
+  enableCam()
 }
 
-// U1 - get user name
-getCurrentUser() {
-  Auth.currentAuthenticatedUser({ bypassCache: true }).then(user => {
-    const username = user.username
-    this.getStream(username)
-    });
-};
-      
-// U2 - get IVS param
-getStream(username) {
-  console.log("tem valor aqui??", username)
+//U1 get transcoder configuration
+const getServers = () =>  {
   let apiName = "saveIVSparam"
-  let path = `/putitens/${username}`;
-  API.get(apiName, path)
-  .then(ivsparams => {
-    console.log(ivsparams.length)
-    if (ivsparams.length === 1) {
-      this.setState({
-        rtmpURL: ivsparams[0].rtmpURL,
-        streamKey: ivsparams[0].streamKey,
-        playURL: ivsparams[0].playURL,
-        apiResult: true,
-      })
+  let path = `/getServers/`;
+  API.get(apiName, path).then(servers =>{
+    console.log("servers response", servers, servers.Items)
+    if (servers.Items.length === 0){
+      console.log("No servers")
     } else {
-      this.redirTo() // in case IVS is not configured
+      console.log("There are", servers.Items[0].dns, servers.Items[1].dns)
+      setPrimaryServer(servers.Items[0].dns)
+      setSecondaryServer(servers.Items[1].dns)
     }
   })
   .catch(error => {
@@ -132,75 +124,56 @@ getStream(username) {
   });
 }
 
-//U3 get transcoder configuration
-getServers() {
-let apiName = "saveIVSparam"
-let path = `/getServers/`;
-API.get(apiName, path).then(servers =>{
-  console.log("servers response", servers, servers.Items)
-  if (servers.Items.length === 0){
-    console.log("No servers")
-  } else {
-    console.log("There are", servers.Items[0].dns, servers.Items[1].dns)
-    this.state.primaryServer = servers.Items[0].dns
-    this.state.secondaryServer = servers.Items[1].dns
-  }
-})
-.catch(error => {
-  console.log(error);
-});
-}
-
 
 // U2.1 - in case IVS is not configured
-redirTo (){
-console.error("Not Configured or Time out API")
-window.location.assign('/admin') 
+const redirTo = () => {
+  console.error("Not Configured or Time out API")
+  window.location.assign('/') /// trocar para redir
 }
 
 // C3 enable camera 
-enableCam = async () => {
-console.log("Loop enable cam")
-console.log("video ID", this.state.vDevID)
-const constraints = { audio: {autoplay: true, deviceId: this.state.aDevID}, video: { width: 1280, height: 720, deviceId: this.state.vDevID } };
-console.log("contrainsts", constraints)
-var stream = this.state
-await navigator.mediaDevices.getUserMedia(
-  constraints
-  ).then(function(mediaStream) {
-      console.log("assim ta o media strema", mediaStream);
-      window.stream = mediaStream;
-      var stream = document.querySelector('video');
-      console.log("E o stream??", stream)
-      var videoTracks = mediaStream.getVideoTracks();
+const enableCam = async () => {
+  console.log("Loop enable cam")
+  console.log("video ID", vDevID, aDevID)
+  //let constraints = { audio: {autoplay: true, deviceId: aDevID}, video: { width: 1280, height: 720, deviceId: vDevID } };
+  console.log("contrainsts", constraints)
+  await navigator.mediaDevices.getUserMedia(
+    constraints
+    ).then(function(mediaStream) {
+        console.log("assim ta o media strema", mediaStream);
+        window.stream = mediaStream;
+        var stream = document.querySelector('video');
+        console.log("E o stream??", stream)
+        var videoTracks = mediaStream.getVideoTracks();
 
+        
+        console.log('Got stream with constraints:', constraints);
+        console.log(`Using video device: ${videoTracks[0].label}`);
+
+        //window.stream = stream;
+        stream.srcObject = mediaStream;
+
+        console.log("UUUUU", stream)
+
+        stream.onloadedmetadata = async function (e) {
+          await stream.play();
+        };
+
+
+      })
+      .catch(error =>  {
+        console.error("Error in EnCam", error);
+        handleError(error);
+      }); 
       
-      console.log('Got stream with constraints:', constraints);
-      console.log(`Using video device: ${videoTracks[0].label}`);
-
-      //window.stream = stream;
-      stream.srcObject = mediaStream;
-
-      console.log("UUUUU", stream)
-
-      stream.onloadedmetadata = async function (e) {
-        await stream.play();
-      };
-
-
-    })
-    .catch(error =>  {
-      console.error("Error in EnCam", error);
-      this.handleError(error);
-    }); 
-    
-    //this.setState({showCam: true})
-    console.log("en cam", this.state.showCam);
+      //this.setState({showCam: true})
+      //console.log("en cam", this.state.showCam);
 };
 
 // C2.1 In case error to enable cam  
-handleError(error) {
+const handleError = (error) => {
 if (error.name === 'ConstraintNotSatisfiedError') {
+  //const constraints = { audio: {autoplay: true, deviceId: aDevID}, video: { width: 1280, height: 720, deviceId: vDevID } };
   const v = constraints.video;
   console.error(`The resolution ${v.width.exact}x${v.height.exact} px is not supported by your device.`);
 } else if (error.name === 'NotAllowedError') {
@@ -209,113 +182,51 @@ if (error.name === 'ConstraintNotSatisfiedError') {
     'order for the demo to work.');
 }
 console.error(`getUserMedia error: ${error.name}`, error);
-this.setState({errorMSG: error.name});
+setErrorMSG(error.name);
 }
 
-//0 - list cam and update cams 
-listCam = async () => {
-let copyItems = this.value
-let gotDevice = []
-let videoin = []
-let audioin = []
-let audioout = []
-await navigator.mediaDevices.enumerateDevices()
-  .then(gotDevices => {
-    gotDevices.forEach(function(gotDevice) {
-      if (gotDevice.kind === 'videoinput'){
-        //console.log("video", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
-        videoin.push({label: gotDevice.label, id: gotDevice.deviceId})
-        console.log("como esta video in!!!!!!", videoin)
-      }
-      if (gotDevice.kind === 'audioinput'){
-        //console.log("audioin", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
-        audioin.push({label: gotDevice.label, id: gotDevice.deviceId})
-      }
-      if (gotDevice.kind === 'audiooutput'){
-        //console.log("audioout", gotDevice.kind + ": " + gotDevice.label + " id = " + gotDevice.deviceId);
-        audioout.push({label: gotDevice.label, id: gotDevice.deviceId})
-      }
-    });
-    this.setState({
-      videoin,
-      audioin,
-      audioout,
-      copyItems,
-      gotDevice
-    }, () => {this.enableCam()}) 
-    console.log("check state", this.state);
-  })
-  .catch(function(err) {
-    console.log(err.name + ": " + err.message);
-  }); 
-};
-
-
-// C4 disable all cams // still bug
-start() {
-const {mediaRecorder, vidRef} = this.state.mediaRecorder
-console.log("print active cams", vidRef, navigator)
-if (mediaRecorder){
-  console.log("tem media recorder", mediaRecorder, vidRef)
-}
-console.log("B4 Window", window) 
-if (window.stream) {
-  console.log("entrei aqui!!!")
-  window.stream.getTracks().forEach(track => {
-    track.stop();
-  });
-  console.log("After Window", window.stream) 
-}
-}
 
 // C5 handle device change
-handleDevChange = event => {
-/// if audio if video 
-event.preventDefault();
-console.log("Device Change block")
-console.log(event.target.value)
-console.log(event.target.id)
-if (event.target.id === 'videoin'){
-  console.log("set video", event.target.value)
-  this.setState({vDevID: event.target.value}, () => {
-    this.enableCam()
-    console.log(this.state.vDevID)
-  });
-  //let vDevID = event.target.value
-}
-if (event.target.id === 'audioin'){
-  console.log("set audio iN")
-  this.setState({aDevID: event.target.value}, () => {
-    this.enableCam()
-    console.log(this.state.aDevID)
-  });
-}
-if (event.target.id === 'audioout'){
-  console.log("set audio out")
-}
-console.log("check this.state", this.state)
-
+const handleDevChange = event => {
+  /// if audio if video 
+  event.preventDefault();
+  console.log("Device Change block", vDevID, aDevID, constraints)
+  console.log(event.target.value)
+  console.log(event.target.id)
+  if (event.target.id === 'videoin'){
+    console.log("set video", event.target.value)
+    setVDevID(event.target.value)
+    }
+  if (event.target.id === 'audioin'){
+    console.log("set audio iN", aDevID)
+    setADevID(event.target.value) 
+  }
+  if (event.target.id === 'audioout'){
+    console.log("set audio out")
+  }
+  console.log("check State", props)
+  enableCam()
 }
 
 // P1 - Open Player windown - future implemtation 
-openPlayer = async (e) => {
-//window.open('/player', '_blank');
-e.preventDefault()
-console.log("e??", e, this.state.playURL)
-const {playURL} = this.state
-this.setState({showPlayer: false, playURL})
-await sleep(10000)
-this.setState({showPlayer: true})
+const openPlayer = async (e) => {
+  //window.open('/player', '_blank');
+  e.preventDefault()
+  console.log("e??", e, playURL)
+  // falta um set URL aqui 
+  setStatus({isShowPlayer:false})
+  await sleep(10000)
+  setStatus({isShowPlayer:true})
 }
 
 // P2 - Player - external
-playChannel = (e) => {
-e.preventDefault();
-this.setState({showPlayer: true})
+const playChannel = (e) => {
+  e.preventDefault();
+  this.setState({showPlayer: true})
 }
 
 // P3 - Player rendering
-playerShow = () => {
+const playerShow = () => {
 return (
   <div>{<VideoPlayer { ...{
     autoplay: true,
@@ -323,11 +234,11 @@ return (
     width: 640,
     height: 360,
     bigPlayButton: true,
-    //token: this.state.token,
+    //token: token,
     cookie: "test",
     sources: [{
       //src: 'http://d2qohgpffhaffh.cloudfront.net/HLS/vanlife/withad/sdr_uncage_vanlife_admarker_60sec.m3u8',
-      src: this.state.playURL,
+      src: playURL,
       type: 'application/x-mpegURL',
     }]
   }}/>}</div>
@@ -335,121 +246,133 @@ return (
 }
 
 //P3.1  - if not on air
-offAirshow = () => {
-return (<div>
-  <img
-    width= "640"
-    height= "360"
-    alt="Off Air"
-    src={offAir}/>
-</div>)
+const offAirshow = () => {
+  return (<div>
+    <img
+      width= "640"
+      height= "360"
+      alt="Off Air"
+      src={offAir}/>
+  </div>)
 }
-
 
 // S2 - Stop streaming to IVS
-stopStreaming = () => {
-const {mediaRecorder, wsRef} = this.state;
-if (mediaRecorder.current.state === 'recording') {
-  mediaRecorder.current.stop();
-  wsRef.current.close();
-}
-this.setState({isStreaming: false, isConnected: false, showPlayer: false, degugMSG: "Waiting connection..."});
+const stopStreaming = () => {
+  const {mediaRecorder, wsRef} = this.state;
+  if (mediaRecorder.current.state === 'recording') {
+    mediaRecorder.current.stop();
+    wsRef.current.close();
+  }
+  setStatus({isConnected:false, isStreaming:false, isShowPlayer:false, setdebugMSG:"Waiting connection...", setAlertFromServers:null}) 
 };
 
+const fallbackServer = (err) => {
+  console.log("got SERVERS!", secondaryServer);
+  this.setState({rtmpURL,streamKey,showComponent: true})
+  let protocol = window.location.protocol.replace('http', 'ws');
+  let testserver = "//127.0.0.1:3004"// //d355h0s62btcyd.cloudfront.net
+  let wsUrlFal = `${protocol}//${testserver}/rtmps/${rtmpURL}${streamKey}`;
+
+
+     // Fallback flow ini
+     console.log("Fallback route", err)
+     wsRef.current = new WebSocket(wsUrlFal);
+     console.log("Trying Server", wsUrlFal)
+     
+
+     wsRef.current.addEventListener('open', async function open(data) {
+       console.log("Open, Server 2!!!", data) /// set state need
+       setStatus({isConnected:true})
+       if(data){
+         console.log("!@@@@!!!")
+         await sleep(25000);
+         setStatus({isStreaming:true, isShowPlayer:true, setdebugMSG:"Connection Open!", setAlertFromServers:null}) 
+       }
+     });
+
+
+     wsRef.current.onmessage = evt =>{
+       console.log("MSG!!", evt)
+       setStatus({setdebugMSG:evt.data}) 
+     }
+
+     wsRef.current.onerror = err => {
+       console.error("Got a error, both servers are out!!!", err, wsRef.current)
+       setStatus({ setAlertFromServers:"CRITICAL ERROR: Both servers are closed"}) 
+     }
+     
+     wsRef.current.onclose = e => {
+       console.log ("Client Closing Conection")
+       stopStreaming()
+       console.log(
+         "Socket is closed", e.reason)
+     }  
+      /// End fallback flow
+
+}
+
 //S1 - Start streaming to IVS
-startStreaming = async (e) =>{
-  e.preventDefault();
-  const {rtmpURL, streamKey, wsRef, mediaRecorder, primaryServer, secondaryServer} = this.state;
-  console.log("SERVERS!", primaryServer, secondaryServer);
-  this.setState({
-    rtmpURL,
-    streamKey,
-    showComponent: true
-  })
-  let protocol = window.location.protocol.replace('https', 'wss');
-  let TestServer = "//127.0.0.1:3004"
-  // //d355h0s62btcyd.cloudfront.net
-  let wsUrl = `${protocol}//${primaryServer}/rtmps/${rtmpURL}${streamKey}`;
-  let wsUrlFal = `${protocol}//${secondaryServer}/rtmps/${rtmpURL}${streamKey}`;
+const startStreaming = async (e) =>{
+    e.preventDefault();
+    console.log("got SERVERS!", primaryServer);
+    let protocol = window.location.protocol.replace('http', 'ws');
+    let testserver = "//127.0.0.1:3009" // //d355h0s62btcyd.cloudfront.net
+    let wsUrl = `${protocol}//${testserver}/rtmps/${rtmpURL}${streamKey}`;
 
-  wsRef.current = new WebSocket(wsUrl);
+    wsRef.current = new WebSocket(wsUrl)
+    console.log("como esta o wsRef", wsRef)
 
-  console.log("como esta o wsRef", wsRef)
+    wsRef.current.onerror = err => {
+      setStatus({ setAlertFromServers:"WARNING! SERVER 1 - Socket Closed!!!"}) 
+      console.error("Got a error!!!", err, wsRef.current)
+      fallbackServer(err) 
+    }
 
-  // Fallback flow
-  wsRef.current.onerror = err => {
-    console.error("Got a error!!!", err)
-    console.log("Trying Server", wsUrlFal)
+    wsRef.current.onclose = e => {
+        console.log ("Fallback 1",  e.reason)
+    }
 
-
-    wsRef.current = new WebSocket(wsUrlFal);
+    wsRef.current.onmessage = evt =>{
+        console.log("MSG!!", evt)
+        setStatus({setdebugMSG:evt.data}) 
+    }
 
     wsRef.current.addEventListener('open', async function open(data) {
-      console.log("Open!!!", data) /// set state need
-      this.setState({isConnected: true})
+      console.log("Open!!!", data)
+      setStatus({isConnected:true}) 
       if(data){
         console.log("!@@@@!!!")
         await sleep(25000);
-        this.setState({isStreaming: true, showPlayer: true});
-        //console.log("State has been set to!!!")
+        setStatus({isStreaming:true, isShowPlayer:true, setdebugMSG:"Connection Open!", setAlertFromServers:null})  
       }
-    }.bind(this));
+    });
 
-  }
-
-  wsRef.current.onmessage = evt =>{
-    console.log("MSG!!", evt)
-    this.setState({degugMSG: evt.data})
-}
-
-
-wsRef.current.addEventListener('open', async function open(data) {
-  console.log("Open!!!", data) /// set state need
-  this.setState({isConnected: true})
-  if(data){
-    console.log("!@@@@!!!")
-    await sleep(25000);
-    this.setState({isStreaming: true, showPlayer: true});
-    //console.log("State has been set to!!!")
-  }
-}.bind(this));
-wsRef.current.addEventListener('close', () => {
-  //this.stopStreaming(); ///////////////TEM que voltar o stop e tratar cada server individualmente
-  this.setState({isConnected: false})
-  console.log("Closed!!!") /// set state need
-});
-
-//console.log("State do Streaming!!!!!!!", this.state.stream)
-
-let vidStreaming = this.state.stream.current.captureStream(30);
-let outputStream = new MediaStream();
-[vidStreaming].forEach(function (s) {
-  s.getTracks().forEach(function (t) {
-    outputStream.addTrack(t);
-  });
-});
-mediaRecorder.current = new MediaRecorder(outputStream, {
-  mimeType: 'video/webm',
-  videoBitsPerSecond: 3000000,
-});
-mediaRecorder.current.addEventListener('dataavailable', (e) => {
-  wsRef.current.send(e.data);
-});
-mediaRecorder.current.start(1000);
+    let vidStreaming = stream.current.captureStream(30);
+    let outputStream = new MediaStream();
+    [vidStreaming].forEach(function (s) {
+      s.getTracks().forEach(function (t) {
+        outputStream.addTrack(t);
+      });
+    });
+    mediaRecorder.current = new MediaRecorder(outputStream, {
+      mimeType: 'video/webm',
+      videoBitsPerSecond: 3000000,
+    });
+    mediaRecorder.current.addEventListener('dataavailable', (e) => {
+      wsRef.current.send(e.data);
+    });
+    mediaRecorder.current.start(1000);
 } 
-render() {
+
   document.body.style = 'background: #262626;';
-  const {videoin, audioin, audioout, stream, isConnected, isStreaming, playURL, errorMSG, showPlayer} = this.state;
-  console.log("Tem Video IN???", videoin);
-  if (videoin){
-    if(!this.state.camison){
-      this.enableCam()
-      this.setState({camison: true})
-    }
-    return (
+
+  console.log("Tem Video IN???", devices.videoin);
+
+    
+    return devices.videoin ? (
       <div className="App">
       <div className="container-fluid">
-        <h1>IVS Simple Streming</h1>
+        <h1>IVS Simple Streming v2</h1>
         {errorMSG && (
             <div className="errorMSG">
               <p>Please enable your Camera, check browser Permissions.</p>
@@ -459,20 +382,20 @@ render() {
         <div className="container-fluid">
               <div className="row">
               <div className="col-lg-6">
-                <form onSubmit={this.handleSubmit} class="form-control-select">
-                    <select id="videoin" class="form-control" value={this.state.value} onChange={this.handleDevChange} >
+                <form class="form-control-select">
+                    <select id="videoin" class="form-control" onChange={(e => setVDevID( vDevID => e.target.value), handleDevChange)}>
                     <option disabled>Select Camera</option>
-                    {videoin.map((videoin) =>
+                    {devices.videoin.map((videoin) =>
                       <option key={videoin.id} value={videoin.id}>{videoin.label}</option>)}
                     </select>
-                    <select id="audioin" class="form-control" value={this.state.value} onChange={this.handleDevChange}>
+                    <select id="audioin" class="form-control"  onChange={(e => setADevID( aDevID => e.target.value), handleDevChange)}>
                     <option disabled>Select Audio In</option>
-                    {audioin.map((audioin) =>
+                    {devices.audioin.map((audioin) =>
                       <option key={audioin.id} value={audioin.id}>{audioin.label}</option>)}
                     </select>
-                    <select id="audioout" class="form-control" value={this.state.value} onChange={this.handleDevChange}>
+                    <select id="audioout" class="form-control"  onChange={handleDevChange}>
                     <option disabled>Select Audio Out</option>
-                    {audioout.map((audioout) =>
+                    {devices.audioout.map((audioout) =>
                       <option key={audioout.id} value={audioout.id}>{audioout.label}</option>)}
                     </select>
                   </form>
@@ -483,11 +406,10 @@ render() {
                       <input 
                       id="streamKey" 
                       type="text"
-                      value={this.state.playURL}
+                      value={playURL}
                       className="form-control-play" 
-                      onChange={e => this.setState({ playURL: e.target.value, isStreaming: false})}
                       />
-                      <button type="submit" className="formBotPlay" onClick={this.openPlayer}>Play</button>
+                      <button type="submit" className="formBotPlay" onClick={openPlayer}>Play</button>
                   </form>
               </div>
 
@@ -501,19 +423,19 @@ render() {
               </div>
               
               <div className="col-lg-6"> 
-                {showPlayer &&(<div className="playercamBOX">
-                  {this.playerShow()}
+                {status.isShowPlayer &&(<div className="playercamBOX">
+                  {playerShow()}
                 </div>
                 )}
-                {!showPlayer && (<div className="playercamBOX">
-                  {this.offAirshow()}
+                {!status.isShowPlayer && (<div className="playercamBOX">
+                  {offAirshow()}
                 </div>)}
               </div>
               
             </div>
             </div>       
           <div className="row">
-          {!isStreaming &&(
+          {!status.isStreaming &&(
           <div className="form-group">
             <form className="form-URL">
               <label className="formLabel">
@@ -522,11 +444,10 @@ render() {
                       id="rtmpURL" 
                       type="text"
                       width= "100%" 
-                      value={this.state.rtmpURL}
+                      value={rtmpURL}
                       className="formURL" 
                       aria-label="Sizing example input" 
                       aria-describedby="inputGroup-sizing-sm"
-                      onChange={e => this.setState({ rtmpURL: e.target.value, showComponent: false})}
                       />
                     </label>
                     <label className="formLabel">
@@ -534,19 +455,18 @@ render() {
                       <input 
                       id="streamKey" 
                       type="password"
-                      value={this.state.streamKey}
+                      value={streamKey}
                       className="formURL" 
                       aria-label="Sizing example input" 
                       aria-describedby="inputGroup-sizing-sm1"
-                      onChange={e => this.setState({ streamKey: e.target.value, showComponent: false})}
                       />
                       </label>
-                  {!isConnected && (
+                  {!status.isConnected && (
                   <div className="formLabel">
-                    <button type="submit" className="formBot" onClick={this.startStreaming}>GoLive!</button>
+                    <button type="submit" className="formBot" onClick={startStreaming}>GoLive!</button>
                   </div>
                   )}
-                  {isConnected && (
+                  {status.isConnected && (
                     <div className="formLabel">
                       <button type="submit" className="formBotConecting">GoingOnAir</button>
                     </div>
@@ -555,12 +475,13 @@ render() {
               </form>
               </div>
               )}
-              {isStreaming &&(
+              {status.isStreaming &&(
                 <div className="form-group">
-                  <button type="submit" className="formBotStop" onClick={this.stopStreaming}>StopStreaming!</button>
+                  <button type="submit" className="formBotStop" onClick={stopStreaming}>StopStreaming!</button>
                 </div>
               )}
           </div>
+          <div className="alertFromServers">{status.alertFromServers}</div>
           <div className="DebugBOXger">
             <div className="DebugBOXtitle">
               <a>Info:</a>
@@ -574,38 +495,26 @@ render() {
                   </tr>
                   <tr>
                     <th>isLive:</th>
-                    <td>{String(isConnected)}</td>
+                    <td>{String(status.isConnected)}</td>
                   </tr>
                   <tr>
                     <th>Servers:</th>
-                    <td>1=({this.state.primaryServer}) 2=({this.state.secondaryServer})</td>
+                    <td>1=({primaryServer}) 2=({secondaryServer})</td>
                   </tr>
                   <tr>
                     <th>Debug MSG:</th>
-                    <td>{String(this.state.degugMSG)}</td>
+                    <td>{String(status.debugMSG)}</td>
                   </tr>
                 </tbody>
             </table>
             </div>
           </div> 
+          
+
           </div>
       </div>
-    );
-  } else {
+    ):(<div>loading...</div>)
+  
+}
 
-    console.log("wait")
-    return(
-    <div>
-        <div className="loading">Loading ...</div>
-        {errorMSG && (<div className="errorMSG">
-          <p>Please enable your Camera, check browser Permissions.</p>
-          <p>Error: {errorMSG}</p>
-        </div>
-        )}
-    </div>
-    )
-    
-  }
-}
-}
-export default withAuthenticator(room);
+export default Streampage;

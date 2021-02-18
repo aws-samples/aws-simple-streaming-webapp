@@ -1,11 +1,14 @@
 // Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-import React, { Component } from 'react';
-import Amplify, { Auth, API } from 'aws-amplify';
+import React, { useEffect, useState } from 'react';
+import Amplify, { API } from 'aws-amplify';
 import './home.style.scss';
 import awsmobile from "../aws-exports";
-import { withAuthenticator } from '@aws-amplify/ui-react'
+import Test from './Test';
+import  { useHistory, withRouter } from 'react-router-dom'
+
+
 
 Amplify.configure(awsmobile);
 
@@ -14,59 +17,42 @@ const constraints = window.constraints = {
   video: true
 };
 
-class roomadm extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      user: null,
-      username: null,
-      rtmpURL: null,
-      streamKey: null,
-      playURL: null,
-      errorMSG: null,
-      apiResult: false,
-      showSuccess: false
-    };
-  }
+function Home (props) {
 
-  componentDidMount() {
-    this.getCurrentUser()
-  }
+  const username = props.username;
+  const [rtmpURL, setRtmpURL] = useState(null);
+  const [streamKey, setStreamKey] = useState(null);
+  const [playURL, setPlayURL] = useState(null);
+  const [errorMSG, setErrorMSG] = useState(null);
+  const [apiResult, setApiResult] = useState(null);
+  const [showSuccess, isShowSuccess]= useState(false);
+  const [configured, isConfigured] = useState(false);
+  const [saved, isSaved] = useState(false);
 
-  //U1- get USER from cognito
-  getCurrentUser() {
-    Auth.currentAuthenticatedUser({ bypassCache: true }).then(user => {
-      console.log(user);
-      this.setState({
-        user,
-        username: user.username
-      });
-      console.log(this.state.username);
-      this.getStream()
-    }); 
-  };
+  useEffect(() => {
+    console.log('Redered!', props)
+    getStream()
+  }, [])
+
 
   //U2- get IVS Params
-  getStream() {
-    const {username} = this.state;
-    console.log("tem valor aqui??", username, this.state.username)
+  const getStream = () => {
+    console.log("Tem valor?", username)
     let apiName = "saveIVSparam"
     let path = `/putitens/${username}`;
     API.get(apiName, path)
     .then(ivsparams => {
       console.log(ivsparams.length)
       if (ivsparams.length === 1) {
-        this.setState({
-          rtmpURL: ivsparams[0].rtmpURL,
-          streamKey: ivsparams[0].streamKey,
-          playURL: ivsparams[0].playURL,
-          apiResult: true,
-          isConfigured:true
-        })
-      } else {this.setState({
-        apiResult: true,
-        isConfigured:false
-        })}
+        setApiResult(ivsparams[0])
+
+        setRtmpURL(ivsparams[0].rtmpURL)
+        setStreamKey(ivsparams[0].streamKey)
+        setPlayURL(ivsparams[0].playURL)
+        isConfigured(true)
+      } else {
+        isConfigured(false)
+        }
     })
     .catch(error => {
       console.log(error);
@@ -75,15 +61,8 @@ class roomadm extends Component {
 
 
   //U3- post store IVS params  
-  storeStream = e => {
+  const storeStream = e => {
     e.preventDefault();
-    console.log(e.target.value)
-    console.log(this.state)
-    
-    const username = this.state.username
-    const rtmpURL = this.state.rtmpURL
-    const streamKey = this.state.streamKey
-    const playURL = this.state.playURL
     let apiName = "saveIVSparam"
     let path = "/putitens"
     let data = {
@@ -97,8 +76,8 @@ class roomadm extends Component {
     API.post(apiName, path, data)
       .then(response => {
         console.log("A resta é", response)
-        this.setState({showSuccess: true});
-        this.getStream();
+        isSaved(true) // antigo  this.setState({showSuccess: true});
+        getStream();
       })
       .catch(error => {
         console.log(error.response);
@@ -106,19 +85,31 @@ class roomadm extends Component {
   }
 
   //C1- get CAMAERAS
-  gotoCam = async () => {
-    console.log("Constrainsts", constraints)
+  const gotoCam = async () => {
+    //console.log("Constrainsts", constraints)
     try {
       await navigator.mediaDevices.getUserMedia(constraints);
-      window.location.assign('/encam') 
+      console.log("Go to route change")
+      routeChange(username)
       } catch (error) {
         console.log("Error loop", error)
-        this.handleError(error);
+        handleError(error);
       }
+  
+  }
+
+  const history = useHistory();
+
+  //C2- get cam redir
+  const routeChange = () => {
+    console.log("In route change")
+    history.push('/Stream', apiResult);
+    //this.props.history.push(path);
+
   }
 
   //C2- cameras ERROR handling
-  handleError(error) {
+  const handleError = (error) => {
     if (error.name === 'ConstraintNotSatisfiedError') {
       const v = constraints.video;
       console.error(`The resolution ${v.width.exact}x${v.height.exact} px is not supported by your device.`);
@@ -128,15 +119,14 @@ class roomadm extends Component {
         'order for the demo to work.');
     }
     console.error(`getUserMedia error: ${error.name}`, error);
-    this.setState({errorMSG: error.name});
+    setErrorMSG(error.name);
   }
   
 
   
-  render() {
+ 
     document.body.style = 'background: #262626;';
-    const {showSuccess, username, apiResult, isConfigured, errorMSG} = this.state;
-    if (!username || !apiResult){return (<div className="loadingData">loading configuration...</div>)}
+    if (!username){return (<div className="loadingData">loading configuration...</div>)}
     else {
       return (
         <div>
@@ -151,7 +141,7 @@ class roomadm extends Component {
               <p>This is a simple webRTC broadcast Sample Demo. Amazon Interactive Video Service, for more details please contact <a href="https://phonetool.amazon.com/users/osmarb">osmarb@</a></p>
             </div>
               {isConfigured && (  
-                <button className="buttonEncam" type="submit" onClick={this.gotoCam}>Enable Cam!</button>
+                <button className="buttonEncam" type="submit" onClick={gotoCam}>Enable Cam!</button>
               )}
            </div>
               {!isConfigured && (
@@ -177,8 +167,8 @@ class roomadm extends Component {
                         className="formURL" 
                         aria-label="Sizing example input" 
                         aria-describedby="inputGroup-sizing-sm"
-                        value={this.state.rtmpURL}
-                        onChange={e => this.setState({ rtmpURL: e.target.value, showComponent: false})}
+                        value={rtmpURL}
+                        onChange={e => setRtmpURL(e.target.value)}
                         />
                       </label>
                       <label className="formLabel">
@@ -187,10 +177,10 @@ class roomadm extends Component {
                         id="streamKey" 
                         type="password"
                         className="formURL"
-                        value={this.state.streamKey}
+                        value={streamKey}
                         aria-label="Sizing example input" 
                         aria-describedby="inputGroup-sizing-sm1"
-                        onChange={e => this.setState({ streamKey: e.target.value, showComponent: false})}
+                        onChange={e => setStreamKey(e.target.value)}
                         />
                         </label>
 
@@ -200,23 +190,24 @@ class roomadm extends Component {
                         id="playURL" 
                         type="text"
                         className="formURL"
-                        value={this.state.playURL}
+                        value={playURL}
                         aria-label="Sizing example input" 
                         aria-describedby="inputGroup-sizing-sm1"
-                        onChange={e => this.setState({ playURL: e.target.value, showComponent: false})}
+                        onChange={e => setPlayURL( e.target.value)}
                         />
                         </label>
                       </div>
                       <div className="formLabel">
-                        <button type="submit" className="formBot" onClick={this.storeStream}>Save</button>
+                        <button type="submit" className="formBot" onClick={storeStream}>Save</button>
                       </div>
                 </form>
                 </div>
-                {showSuccess && ( <div className="saved">Channel has been saved for user {this.state.username}</div>)}
+                {showSuccess && ( <div className="saved">Channel has been saved for user {username}</div>)}
       </div>
       </div>
       )}
-  }
+  
 }
-export default withAuthenticator(roomadm);
+export default withRouter(Home);
+
 

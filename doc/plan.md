@@ -73,3 +73,6 @@ https://stackoverflow.com/questions/27908408/webrtc-how-to-mute-local-audio-outp
 sk_us-east-1_gecbHp7v8OJg_FN7Uxsqxud0186yUUCnhqcy4PaxTsR
 rtmps://ca538d4d3d92.global-contribute.live-video.net:443/app/
 https://ca538d4d3d92.us-east-1.playback.live-video.net/api/video/v1/us-east-1.904149973046.channel.5xGI6F0YnnSe.m3u8
+
+## Convert:
+https://nimblewebdeveloper.com/blog/convert-react-class-to-function-component
