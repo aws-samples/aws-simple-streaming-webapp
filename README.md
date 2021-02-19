@@ -116,6 +116,12 @@ The Amazon DynamoDB table named ivs-task-dns-track will be used to keep track of
 ```
 aws dynamodb create-table --cli-input-json file://json_configs/dynamodb_table.json
 ```
+##### 3.2 Populates the Amazon DynamoDB ivs-task-dns-track table with the initial values
+
+```
+aws dynamodb batch-write-item --request-items \
+file://json_configs/ivs_dynamodb_populate.json --return-consumed-capacity INDEXES
+```
 
 #### 4. The Security Group
 
@@ -308,7 +314,3 @@ Finally copy the IVS parameters and add to the interface.
 Select your prefered camera and audio input and click on Go Live!
 
 <img src="doc/ISSSLive.png" alt="You Are Live" />
-
-## References and useful links
-
-Code based on https://github.com/fbsamples/Canvas-Streaming-Example

@@ -32,6 +32,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+/doc/index.html
+/doc/plan.md
 
 #under dev
 /client*
