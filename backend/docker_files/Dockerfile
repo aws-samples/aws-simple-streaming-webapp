@@ -20,12 +20,17 @@ RUN apt-get update \
 	&& mkdir -p /opt/ivs-simple-webrtc/www \
 	&& cd /opt/ivs-simple-webrtc
 
-# Expose port 80
-EXPOSE 80
+# Expose port 443
+EXPOSE 443
 
 # Copy server.js to /opt/ivs-simple-webrtc folder
 COPY server.js /opt/ivs-simple-webrtc/
 COPY health-check.html /opt/ivs-simple-webrtc/www/
+COPY key.pem /opt/ivs-simple-webrtc/
+COPY cert.pem /opt/ivs-simple-webrtc/
 
 # Start webserver
 CMD ["pm2-runtime","/opt/ivs-simple-webrtc/server.js","-i max"]
+
+# For debugging purposes
+#CMD ["sleep","3600"]

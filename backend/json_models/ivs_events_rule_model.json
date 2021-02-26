@@ -1,0 +1,6 @@
+{
+    "Name": "ip-register",
+    "EventPattern": "{\n  \"source\": [\"aws.ecs\"],\n  \"detail-type\": [\"ECS Task State Change\"],\n  \"detail\": {\n    \"clusterArn\": [\"ARN_HERE"],\n    \"lastStatus\": [{\n      \"anything-but\": [\"PENDING\", \"PROVISIONING\", \"STOPPED\",\"DEPROVISIONING\"]\n    }]\n  }\n}",
+    "State": "ENABLED",
+    "EventBusName": "default"
+}

@@ -1,0 +1,20 @@
+{
+  "Version": "2012-10-17",
+  "Id": "default",
+  "Statement": [
+    {
+      "Sid": "ivs-webrtc-deployment",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "events.amazonaws.com"
+      },
+      "Action": "lambda:InvokeFunction",
+      "Resource": "lambda_arn",
+      "Condition": {
+        "ArnLike": {
+          "AWS:SourceArn": "rule_arn"
+        }
+      }
+    }
+  ]
+}

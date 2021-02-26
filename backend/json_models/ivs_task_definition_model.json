@@ -22,9 +22,9 @@
             }
         }
     ],
-    "family": "ivs-webrtc-333",
-    "taskRoleArn": "arn:aws:iam::862418150245:role/ecsTaskExecutionRole",
-    "executionRoleArn": "arn:aws:iam::862418150245:role/ecsTaskExecutionRole",
+    "family": "ivs-webrtc",
+    "taskRoleArn": "arn:aws:iam::862418150245:role/ecsTask",
+    "executionRoleArn": "arn:aws:iam::862418150245:role/ecsTask",
     "networkMode": "awsvpc",
     "requiresCompatibilities": [
         "FARGATE"

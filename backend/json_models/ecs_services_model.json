@@ -1,7 +1,7 @@
 {
     "cluster": "ivs",
-    "serviceName": "ivs-webrtc-xxx",
-    "taskDefinition": "ivs-webrtc:4",
+    "serviceName": "ivs-webrtc",
+    "taskDefinition": "ivs-webrtc",
     "desiredCount": 0,
     "launchType": "FARGATE",
     "schedulingStrategy": "REPLICA",
