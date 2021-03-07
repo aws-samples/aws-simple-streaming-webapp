@@ -45,7 +45,7 @@ function App(props){
           <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
           <ul className="navbar-nav mr-auto">
           <a className="navbar-brand" href="/">
-            <img src={logo} alt={logo} width="65"/>
+            <img src={logo} alt={logo} width="32"/>
           </a>
             <li><Link to={'/'} className="nav-link">Home</Link></li>
           </ul>

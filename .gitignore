@@ -4,7 +4,6 @@
 /node_modules
 /amplify
 /frontend/node_modules
-/frontend/amplify
 /backend/node_modules
 /.pnp
 .pnp.js
@@ -14,6 +13,21 @@
 /frontend/.vscode
 /frontend/js
 /frontend/index.html
+
+#amplify
+/frontend/amplify*
+/frontend/amplify/.config/local-*
+/frontend/amplify/\#current-cloud-backend
+/frontend/amplify/mock-data
+/frontend/amplify/backend/amplify-meta.json
+/frontend/amplify/backend/awscloudformation
+/frontend/amplify/logs/
+/frontend/amplify/hosting
+
+
+#history
+.history
+
 
 
 # production
