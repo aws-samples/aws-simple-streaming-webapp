@@ -1,0 +1,17 @@
+{
+  "name": "transwrap-proxy",
+  "version": "0.2.0",
+  "description": "video proxy webm to rtmps",
+  "main": "transwrap.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "ws": "^7.4.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node transwrap.js",
+    "start-test": "node transwrap_local.js"
+  },
+  "author": "osmarb marlonpc",
+  "license": "MIT"
+}

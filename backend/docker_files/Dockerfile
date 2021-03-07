@@ -23,14 +23,15 @@ RUN apt-get update \
 # Expose port 443
 EXPOSE 443
 
-# Copy server.js to /opt/ivs-simple-webrtc folder
-COPY server.js /opt/ivs-simple-webrtc/
+# Copy transwraper.js to /opt/ivs-simple-webrtc folder
+COPY transwraper.js /opt/ivs-simple-webrtc/
 COPY health-check.html /opt/ivs-simple-webrtc/www/
+# backlog generate cert and key, check /backend/Readme.md
 COPY key.pem /opt/ivs-simple-webrtc/
 COPY cert.pem /opt/ivs-simple-webrtc/
 
 # Start webserver
-CMD ["pm2-runtime","/opt/ivs-simple-webrtc/server.js","-i max"]
+CMD ["pm2-runtime","/opt/ivs-simple-webrtc/transwraper.js","-i max"]
 
 # For debugging purposes
 #CMD ["sleep","3600"]
