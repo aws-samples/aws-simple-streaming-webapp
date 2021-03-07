@@ -9,7 +9,7 @@ The backend transwrap server (transwrap.js) is a simple socket server that recei
 First install the dependencies and then use the file transwrap_local.js with node.
 ```
     npm install
-    node transwrap_local.js
+    npm start-test transwrap_local.js
 ```
 
 it should give the following result
@@ -31,6 +31,13 @@ Note: Self-signed certificates are not recomended for a non-development evirolme
     openssl req -new -key key.pem -out csr.pem
     openssl x509 -req -days 9999 -in csr.pem -signkey key.pem -out cert.pem
     rm csr.pem
+```
+
+Running locally in HTTPS
+
+```
+    npm install
+    npm start transwrap.js
 ```
 
 The certificates has to be generated in the backend folder.

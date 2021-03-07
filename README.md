@@ -314,3 +314,32 @@ Finally copy the IVS parameters and add to the interface.
 Select your prefered camera and audio input and click on Go Live!
 
 <img src="doc/ISSSLive.png" alt="You Are Live" />
+
+## 6. (Optional): Cleanup, removing the provisioned AWS resources.
+
+For removing the Broadcaster producer APP 
+If you need to remove the resources deployed by this sample, you can use the command below:
+
+```
+  amplify delete
+```
+
+For removing the Transwrap proxy server, you can use the bash script uninstall_ivs_backend.sh
+
+```
+  cd backend
+  ./uninstall_ivs_backend.sh
+```
+
+## Logo
+
+The [IVS Simple Streaming Logo](/frontend/src/img/is2.png) represents the abreviation of the solution naming.
+
+## Notice
+
+! This project uses FFMPG, http://www.ffmpeg.org, please check lisensing usage.
+
+## Limitations and Considerations
+
+This is a reference solution ideal for testing and accelerates your cloud adoption. Designed for short-duration events. Please reach your AWS representative for architecting a custom solution for large-scale production-grade events.
+
