@@ -15,7 +15,7 @@
 /frontend/index.html
 
 #amplify
-/frontend/amplify*
+#/frontend/amplify*
 /frontend/amplify/.config/local-*
 /frontend/amplify/\#current-cloud-backend
 /frontend/amplify/mock-data
@@ -23,6 +23,8 @@
 /frontend/amplify/backend/awscloudformation
 /frontend/amplify/logs/
 /frontend/amplify/hosting
+/frontend/amplify/cli.json
+/frontend/amplify/team-provider-info.json
 
 
 #history

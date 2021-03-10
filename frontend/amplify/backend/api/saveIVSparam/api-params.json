@@ -1,0 +1,67 @@
+{
+    "paths": [
+        {
+            "name": "/putitens",
+            "lambdaFunction": "saveIVSparam",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ]
+            },
+            "policyResourceName": "/putitens"
+        },
+        {
+            "name": "/getServers",
+            "lambdaFunction": "ISSgetServers",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH"
+                ]
+            }
+        }
+    ],
+    "resourceName": "saveIVSparam",
+    "apiName": "saveIVSparam",
+    "functionArns": [
+        {
+            "lambdaFunction": "saveIVSparam"
+        },
+        {
+            "lambdaFunction": "ISSgetServers"
+        }
+    ],
+    "privacy": {
+        "auth": 2,
+        "unauth": 0,
+        "authRoleName": "amplify-simplewebstreaming-dev-161106-authRole",
+        "unAuthRoleName": "amplify-simplewebstreaming-dev-161106-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "saveIVSparam",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        },
+        {
+            "category": "function",
+            "resourceName": "ISSgetServers",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ],
+    "uuid": "27d038c4"
+}
