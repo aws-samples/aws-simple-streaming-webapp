@@ -1,4 +1,4 @@
-# Simple webRTC to RTMP for Amazon Interactive Video Streaming
+# Simple webRTC to RTMP for Amazon Interactive Video Service
 
 Reference code and solution to simplify the live streaming by using the browser APIs and webRTC to capture the video.
 The solution is based on small, idependent and decoupled blocks to capture cameras and transwrap it to RTMP 
@@ -264,7 +264,6 @@ For more complete steps of installing and configure AWS Amplify please visit the
   git clone https://github.com/osmarbento-AWS/simple-streaming-webapp.git
   cd simple-streaming-webpp/frontend/
   npm install
-  amplify init --app https://github.com/osmarbento-AWS/simple-streaming-webapp.git
   amplify init
   amplify push
 ```
@@ -330,10 +329,6 @@ For removing the Transwrap proxy server, you can use the bash script uninstall_i
   cd backend
   ./uninstall_ivs_backend.sh
 ```
-
-## Logo
-
-The [IVS Simple Streaming Logo](/frontend/src/img/is2.png) represents the abreviation of the solution naming.
 
 ## Notice
 

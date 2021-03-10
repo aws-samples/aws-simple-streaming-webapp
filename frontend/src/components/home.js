@@ -32,7 +32,6 @@ function Home (props) {
     getStream()
   }, [])
 
-
   //U2- get IVS Params
   const getStream = () => {
     console.log("Tem valor?", username)

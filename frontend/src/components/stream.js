@@ -7,7 +7,7 @@ import './stream.style.scss'
 import Amplify, { Auth, API} from 'aws-amplify';
 import awsmobile from "../aws-exports";
 import VideoPlayer from './player/player';
-import offAir from '../img/offair.jpg'
+import offAir from '../img/offair.png'
 
 Amplify.configure(awsmobile);
 
@@ -304,7 +304,7 @@ const startStreaming = async (e) =>{
         console.log ("Fallback 1",  e.reason)
     }
 
-    wsRef.current.onmessage = evt =>{s
+    wsRef.current.onmessage = evt =>{
         //console.log("MSG!!", evt)
         setdebugMSG(evt.data)
     }

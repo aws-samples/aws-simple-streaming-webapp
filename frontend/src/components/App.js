@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT-0
 
 import React, { useEffect, useState } from 'react';
-import logo from '../img/is2.png';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import Stream from './stream';
 import Home from './home';
@@ -45,7 +44,7 @@ function App(props){
           <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
           <ul className="navbar-nav mr-auto">
           <a className="navbar-brand" href="/">
-            <img src={logo} alt={logo} width="32"/>
+
           </a>
             <li><Link to={'/'} className="nav-link">Home</Link></li>
           </ul>
