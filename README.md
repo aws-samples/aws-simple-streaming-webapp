@@ -369,3 +369,12 @@ For removing the Transwrap proxy server, you can use the bash script uninstall_i
 
 This is a reference solution ideal for testing and accelerates your cloud adoption. Designed for short-duration events. Please reach your AWS representative for architecting a custom solution for large-scale production-grade events.
 
+## Security
+
+See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+
+## License
+
+This library is licensed under the MIT-0 License. See the LICENSE file.
+
+
