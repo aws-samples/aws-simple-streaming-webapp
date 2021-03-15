@@ -1,5 +1,6 @@
-// Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
+
 import React from 'react';
 import videojs from 'video.js';
 import  'video.js/dist/video-js.css'

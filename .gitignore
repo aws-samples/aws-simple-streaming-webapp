@@ -25,8 +25,8 @@
 /frontend/amplify/hosting
 /frontend/amplify/cli.json
 /frontend/amplify/team-provider-info.json
-/frontend/src/aws-exports*
-/frontend/src/aws-video-exports.js
+frontend/src/aws-video-exports.js
+
 
 
 #history

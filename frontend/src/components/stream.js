@@ -1,6 +1,5 @@
-// Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-// branch with player
 
 import React, { useRef, useState, useEffect } from 'react';
 import './stream.style.scss'
