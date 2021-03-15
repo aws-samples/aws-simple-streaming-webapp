@@ -207,7 +207,6 @@ return (
     //token: token,
     cookie: "test",
     sources: [{
-      //TEST URL: src: 'http://d2qohgpffhaffh.cloudfront.net/HLS/vanlife/withad/sdr_uncage_vanlife_admarker_60sec.m3u8',
       src: playURL,
       type: 'application/x-mpegURL',
     }]
@@ -240,7 +239,7 @@ const fallbackServer = (err) => {
   console.log("got SERVERS!", wrapServers.secondaryServer);
   let serverSec = wrapServers.secondaryServer
   let protocol = window.location.protocol.replace('http', 'ws');
-  let testserver = "//127.0.0.1:3004"// //d355h0s62btcyd.cloudfront.net
+  let testserver = "//127.0.0.1:3004" // if you need to perform test locally you can use the internal 
   let wsUrlFal = `${protocol}//${serverSec}/rtmps/${rtmpURL}${streamKey}`;
 
 
@@ -288,7 +287,6 @@ const startStreaming = async (e) =>{
     console.log("got SERVERS!", wrapServers.primaryServer);
     let protocol = window.location.protocol.replace('http', 'ws');
     let localtest = '//127.0.0.1:3004'
-    let testserver = "//d355h0s62btcyd.cloudfront.net" // //d355h0s62btcyd.cloudfront.net
     let wsUrl = `${protocol}//${localtest}/rtmps/${rtmpURL}${streamKey}`;
 
     wsRef.current = new WebSocket(wsUrl)

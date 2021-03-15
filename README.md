@@ -259,12 +259,43 @@ For more complete steps of installing and configure AWS Amplify please visit the
 ```
 
 #### 2. Clone the repository solution
+In this session we will install the npm packages, initialize the amplify environment and deploy cloud resources.
 
 ```
   git clone https://github.com/osmarbento-AWS/simple-streaming-webapp.git
   cd simple-streaming-webpp/frontend/
   npm install
   amplify init
+```
+For the environment select **dev**
+Now you need to select the profile created in the previous step, with amplify configure
+
+```
+  ? Enter a name for the environment dev
+  ? Choose your default editor: Visual Studio Code
+  Using default provider  awscloudformation
+  ? Select the authentication method you want to use: AWS access keys
+```
+
+Now you can list the resources that it's going to be created once we push the environment creation.
+
+```
+  Current Environment: dev
+
+  | Category | Resource name              | Operation | Provider plugin   |
+  | -------- | -------------------------- | --------- | ----------------- |
+  | Hosting  | S3AndCloudFront            | Create    | awscloudformation |
+  | Auth     | simplewebstreaming5fec9bae | Create    | awscloudformation |
+  | Storage  | IVSparam                   | Create    | awscloudformation |
+  | Storage  | ISStaskdnstrack            | Create    | awscloudformation |
+  | Function | saveIVSparam               | Create    | awscloudformation |
+  | Function | ISSgetServers              | Create    | awscloudformation |
+  | Api      | saveIVSparam               | Create    | awscloudformation |
+```
+
+Now you can push with:
+
+```
   amplify push
 ```
 
