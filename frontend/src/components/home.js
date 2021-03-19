@@ -30,6 +30,7 @@ function Home (props) {
   useEffect(() => {
     console.log('Redered!', props)
     getStream()
+    getServers()
   }, [])
 
   //U2- get IVS Params
@@ -93,6 +94,22 @@ function Home (props) {
         handleError(error);
       }
   
+  }
+
+  const getServers = () =>  {
+    let apiName = "saveIVSparam"
+    let path = `/getServers/`;
+    API.get(apiName, path).then(servers =>{
+      console.log("servers response", servers, servers.Items)
+      if (servers.Items.length === 0){
+        console.log("No servers")
+      } else {
+        console.log("There are", servers.Items[0].dns, servers.Items[1].dns)
+      }
+    })
+    .catch(error => {
+      console.log(error);
+    });
   }
 
   const history = useHistory();

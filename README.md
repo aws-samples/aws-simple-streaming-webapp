@@ -262,8 +262,8 @@ For more complete steps of installing and configure AWS Amplify please visit the
 In this session we will install the npm packages, initialize the amplify environment and deploy cloud resources.
 
 ```
-  git clone https://github.com/osmarbento-AWS/simple-streaming-webapp.git
-  cd simple-streaming-webpp/frontend/
+  git clone https://github.com/aws-samples/aws-simple-streaming-webapp.git
+  cd aws-simple-streaming-webpp/frontend/
   npm install
   amplify init
 ```
