@@ -16,6 +16,9 @@ channelEndpoint=$(cat ./temp_files/ivs_channel_info.txt | jq '.channel.ingestEnd
 # Saves StreamKey
 streamKey=$(cat ./temp_files/ivs_channel_info.txt | jq '.streamKey.value' | sed -e 's/"//g')
 
+# Saves PlaybackUrl
+playbackUrl=$(cat ./temp_files/ivs_channel_info.txt | jq '.channel.playbackUrl' | sed -e 's/"//g')
+
 echo -e "\nCopy EndPoint: ${GREEN}${channelEndpoint}${NC}\n" 
 echo -e "Copy StreamKey: ${GREEN}${streamKey}${NC}\n" 
-
+echo -e "Copy PaybackUrl: ${GREEN}${playbackUrl}${NC}\n" 
