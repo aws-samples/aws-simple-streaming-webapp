@@ -38,7 +38,7 @@ function iam_resources () {
 && aws iam attach-role-policy --role-name ivs-ecs-execution-role --policy-arn arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs
 
     # Test if exists
-    aws iam get-role --role-name ivs-ecs-execution-role > /dev/null 2>&1 && iam='OK' || iam='NOK'
+    aws iam get-role --role-name ivs-lambda-role > /dev/null 2>&1 && iam='OK' || iam='NOK'
     
     if [ $iam = 'NOK' ]
     then
