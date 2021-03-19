@@ -274,7 +274,7 @@ Now you need to select the profile created in the previous step, with amplify co
   ? Enter a name for the environment dev
   ? Choose your default editor: Visual Studio Code
   Using default provider  awscloudformation
-  ? Select the authentication method you want to use: AWS access keys
+  ? Select the authentication method you want to use: AWS profile
 ```
 
 Now you can list the resources that it's going to be created once we push the environment creation.
@@ -284,7 +284,6 @@ Now you can list the resources that it's going to be created once we push the en
 
   | Category | Resource name              | Operation | Provider plugin   |
   | -------- | -------------------------- | --------- | ----------------- |
-  | Hosting  | S3AndCloudFront            | Create    | awscloudformation |
   | Auth     | simplewebstreaming5fec9bae | Create    | awscloudformation |
   | Storage  | IVSparam                   | Create    | awscloudformation |
   | Storage  | ISStaskdnstrack            | Create    | awscloudformation |
