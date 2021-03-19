@@ -325,18 +325,27 @@ Add into the Simple Streaming Solution and Save!
 
 If you don't have a channel created on IVS yet, you can follow the 3 simple steps bellow
 
-#### 4.1. (Optional): Creating a Channel on Amazon Iteractive Video Service
+#### 4.1. Creating a Channel on Amazon Iteractive Video Service
+Lets use the AWS Cli to create our channel. 
+Note: If you prefere, you can create the channel using [Amazon Interactive Video Service Console](https://console.aws.amazon.com/ivs/) 
 
-a. Go to [Amazon Interactive Video Service Console](https://console.aws.amazon.com/ivs/)
+```
+  aws ivs create-channel --name ivs-webrtc
+```
 
-b. Create your IVS Channel
-In simple two steps:
+#### 4.2. Copy and save the ingestEndpoint and streamKey value
 
-<img src="doc/IVSCreateChannel_1.png" alt="IVS Parameters" />
-<img src="doc/IVSCreateChannel_2.png" alt="IVS Parameters" />
+```
+  Copy EndPoint: rtmps://6f0eda55d6df.global-contribute.live-video.net:443/app/
 
-Finally copy the IVS parameters and add to the interface.
-<img src="doc/IVSCopy.png" alt="Copy Parameters" />
+  Copy StreamKey: sk_us-east-1_siFTKMADpmqe_dzUYPKAZjbE1lcrbQdudLA8sASWAqN
+
+  Copy playbackUrl: https://8f97718d90a0.us-east-1.playback.live-video.net/api/video/v1/us-east-1.098435415742.channel.cxhSJCwxyiyF.m3u8
+```
+
+#### 4.3. Add the ingestEndpoint, streamKey value and playbackUrl to the interface
+
+<img src="doc/IVSAddParam.png" alt="IVS Parameters" />
 
 #### 5. Test your live streaming from your browser
 
