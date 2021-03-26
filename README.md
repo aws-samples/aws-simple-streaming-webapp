@@ -1,265 +1,48 @@
-# Simple webRTC to RTMP for Amazon Interactive Video Service
+# Simplifying live streaming contribution
 
-Reference code and solution to simplify the live streaming by using the browser APIs and webRTC to capture the video.
-The solution is based on small, idependent and decoupled blocks to capture cameras and transwrap it to RTMP 
+A reference code and solution to simplify the live streaming by using the browser APIs and webRTC to capture the video.
+The solution is based on small, independent, and decoupled blocks to capture cameras and transwrap video into RTMPS, sending to (Amazon Interactive Video Service(https://aws.amazon.com/ivs/)).
 
 <img src="doc/front.png" alt="Application Frontend" />
 
 ## Solution Architecture
 
+<img src="doc/arch.png" alt="Application Architecture" />
+
+## Solution Components
+1.	Broadcaster app: This application uses basic browser APIs to capture audio and video media, and a client web socket to send data to the server web socket. It uses AWS Amplify, which offers tools to build scalable full-stack applications.
+2.	Amazon IVS: A managed live streaming solution that is quick and easy to set up and is ideal for creating interactive video experiences.
+3.	Proxy video transwrap:  This application uses Node.js to open an HTTPS server for the WebSocket communication, and FFmpeg to transwrap the stream in RTMPS to Amazon IVS.    
+4.	Client player: This application uses Video.js player framework to decode the video streamed by Amazon IVS. 
+
 ## Deployment Steps
 
-### Pre-requeriments
+### Prerequisites
 
-For deploying the transwrap container, we will need to install AWS Cli (Install AWS Cli (https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)) and the jq tool. 
-
-``` 
-# If you are using Mac OS, do:
-brew install jq
-
-# If you are using Amazon Linux, do:
-yum install jq
-
-# If you are using Ubuntu Linux, do:
-apt-get install jq
-```
-
-For building the integration with AWS components and host our web application we will be using AWS Amplify. 
-For more complete steps of installing and configure AWS Amplify please visit the documentation (Amplify Documentation (https://docs.amplify.aws/start/getting-started/installation/q/integration/react#option-2-follow-the-instructions) for React). 
+To deploy the transwrap container, we must install AWS Command Line Interface (AWS CLI v2(https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)) and the JQ tool. JQ is a command line tool for parsing JSON. Most of the AWS CLI command we use to deploy the backend relies on JSON parsing to build and adjust the files used to configure the required AWS services. 
 
 ```
-  npm install -g @aws-amplify/cli
-  amplify configure
-  amplify init
+  # If you are using macOS, do:
+  brew install jq
+
+  # If you are using Amazon Linux, do:
+  yum install jq
+
+  # If you are using Ubuntu Linux, do:
+  apt-get install jq
 ```
+To build the integration with AWS components and host our web application, we use AWS Amplify. For more details on installing and configuring AWS Amplify, please visit the (Amplify Documentation for React(https://docs.amplify.aws/start/getting-started/installation/q/integration/react#option-2-follow-the-instructions)).
 
-### A- Backend: Transwraping container ECS 
-
-For building the transraping container you will need to perform steps to prepare your AWS environment (roles, policies and the AWS resources to support the backend). 
-
-#### 0. Change to the backend folder insider the git project you just downloaded
-
-The whole backend commands for deploy was designed to be ran from simple-streaming-webapp/backend. If you forget this step, the deployment will not work properly.
-
-```
-cd simple-streaming-webapp/backend
-```
-
-#### 1. Creating the roles and policies
-
-Our containers will be running in AWS Fargate and our automation will be done by AWS Lambda. Both of these resource will require roles to run and perform actions against other AWS services.
-
-##### 1.1 Create the Amazon ECS execution role that will be used on our ECS Container.
+To build the integration with AWS components and host our web application, we use AWS Amplify. For more details on installing and configuring AWS Amplify, please visit the  (Amplify Documentation (https://docs.amplify.aws/start/getting-started/installation/q/integration/react#option-2-follow-the-instructions) for React). 
 
 ```
-aws iam create-role --role-name ivs-ecs-execution-role \
---assume-role-policy-document file://json_configs/ivs_ecs_trust_policy.json \
-| jq '.Role.Arn' | sed 's/"//g' > ./temp_files/ivs_ecs_execution_role_arn.txt
-```
-
-##### 1.2 Attach the required policies to Amazon ECS execution role you just created.
-
-```
-aws iam attach-role-policy --role-name ivs-ecs-execution-role \
---policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy \
-&& aws iam attach-role-policy --role-name ivs-ecs-execution-role \
---policy-arn arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs
-```
-
-##### 1.3 Create the AWS Lambda execution role that will allow lambda to access the required AWS resources.
-
-```
-aws iam create-role --role-name ivs-lambda-role \
---assume-role-policy-document file://json_configs/ivs_lambda_trust_policy.json
-```
-
-##### 1.4 Attach the required policies to AWS Lambda execution role you just created.
-
-```
-aws iam attach-role-policy --role-name ivs-lambda-role \
---policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole \
-&& aws iam attach-role-policy --role-name ivs-lambda-role \
---policy-arn arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess \
-&& aws iam attach-role-policy --role-name ivs-lambda-role \
---policy-arn $(aws iam create-policy --policy-name ivs_dynamodb \
---policy-document file://json_configs/ivs_lambda_dynamodb_policy.json \
-| jq '.Policy.Arn' | sed 's/"//g' > ./temp_files/lambda_policy_arn.txt \
-&& cat ./temp_files/lambda_policy_arn.txt)
-```
-
-#### 2. The AWS Lambda funtion
-
-The lambda function named ivs-ip-register will be used to capture the public ip's of AWS Fargate tasks and save it in a DynamoDB table.
-
-##### 2.1 Creates lambda.json with our lambda configuration
-
-```
-lambda_role_arn=$(aws iam get-role --role-name ivs-lambda-role \
-| jq '.Role.Arn' | sed 's/"//g') \
-&& jq --arg v "$lambda_role_arn" '. |= . + {"Role":$v}' \
-./json_models/lambda_model.json > ./json_configs/lambda.json
-```
-
-##### 2.2 Creates the ivs-ip-register lambda function
-
-```
-aws lambda create-function --cli-input-json file://json_configs/lambda.json \
---zip-file fileb://lambda.zip
-```
-
-#### 3. The Amazon DynamoDB table
-
-The Amazon DynamoDB table named ivs-task-dns-track will be used to keep track of the public ip's of each AWS Fargate task. 
-
-##### 3.1 Creates the Amazon DynamoDB ivs-task-dns-track table
-
-```
-aws dynamodb create-table --cli-input-json file://json_configs/dynamodb_table.json
-```
-##### 3.2 Populates the Amazon DynamoDB ivs-task-dns-track table with the initial values
-
-```
-aws dynamodb batch-write-item --request-items \
-file://json_configs/ivs_dynamodb_populate.json --return-consumed-capacity INDEXES
-```
-
-#### 4. The Security Group
-
-The services from AWS Fargate will require a security group to allow incomming traffic on 443 (https).
-
-```
-aws ec2 create-security-group --group-name ivs-sg \
---description "IVS WetRTC Security Group" --vpc-id $(aws ec2 describe-vpcs \
-| jq '.Vpcs[] | select(.IsDefault)' | jq '.VpcId' | sed 's/"//g') \
-| jq '.GroupId' | sed 's/"//g' > ./temp_files/ivs_sg.txt && while read line; \
-do aws ec2 authorize-security-group-ingress --group-id $(cat ./temp_files/ivs_sg.txt) \
---protocol tcp --port $line --cidr 0.0.0.0/0; done < ./json_models/ivs_ports.txt
-```
-
-#### 5. The Amazon ECS cluster 
-
-The Amazon ECS will be used to run the our services and tasks (containers it self). As we are opting to use AWS Fargate (serveless option of Amazon ECS) we will just need to define the cluster, task definitions and service.
-
-##### 5.1 Creates the Amazon ECS Cluster named ivs
-
-```
-aws ecs create-cluster --cluster-name ivs \
-| jq '.cluster.clusterArn' | sed 's/"//g' > ./temp_files/ecs_cluster_arn.txt
-```
-
-##### 5.2 Configures the ivs_task_definition.json file with the correct Amazon ECS execution previously created
-
-```
-ecs_role_arn=$(cat ./temp_files/ivs_ecs_execution_role_arn.txt) \
-&& jq --arg v "$ecs_role_arn" '. |= . + {"taskRoleArn":$v,"executionRoleArn":$v}' \
-./json_models/ivs_task_definition_model.json > ./json_configs/ivs_task_definition.json
-```
-##### 5.3 Creates Amazon ECS Task Definition named ivs-webrtc
-
-```
-aws ecs register-task-definition --cli-input-json file://json_configs/ivs_task_definition.json
-```
-
-##### 5.4 Select the proper subnets from your default vpc to be used by Amazon ECS Service
-
-```
-aws ec2 describe-subnets --filter Name=vpc-id,Values=$(aws ec2 describe-vpcs \
-| jq '.Vpcs[] | select(.IsDefault)' | jq '.VpcId' | sed 's/"//g') \
---query 'Subnets[?MapPublicIpOnLaunch==`true`].SubnetId' \
-| sed -e '/^$/d;:a;N;$!ba;s/\n//g;s/ //g;s/[][]//g;s/.$//;s/^.//' > ./temp_files/my_subnets.txt
-```
-
-##### 5.5 Creates the template ivs_ecs_service.json to be used by the Amazon ECS Server
-
-```
-store_sgid=$( cat ./temp_files/ivs_sg.txt) \
-&& store_subnets=$(sed -e 'N;s/\n//;N;s/\n//;N;s/\n//' ./temp_files/my_subnets.txt \
-| sed -e 'N;s/\n//;s/ //g;s/[][]//g;s/^"//g;s/"$//g') \
-&& jq --arg v "$store_subnets" '.networkConfiguration.awsvpcConfiguration |= . + {"subnets":[$v]}' \
-./json_models/ecs_services_model.json | \
-jq --arg v "$store_sgid" '.networkConfiguration.awsvpcConfiguration |= . + {"securityGroups":[$v]}' \
-| sed -e 's/\\//g' > ./json_configs/ivs_ecs_service.json
-```
-
-##### 5.6 Creates the Amazon ECS service named ivs-webrtc
-
-```
-aws ecs create-service --cli-input-json file://json_configs/ivs_ecs_service.json
-```
-
-#### 6. Creating the Amazon EventBridge Rule
-
-The Amazon EventBridge will detect changes on our ecs tasks from ivs-webrtc service and trigger our lambda function ivs-ip-register. The ivs-ip-register will then filter the events of Stop and Running type to keep the DynamoDB ivs-task-dns-track table updated.
-
-##### 6.1 Configures the ivs_events_rule.json with the correct ivs service configured in out Amazon ECS Cluster
-
-```
-ecs_arn=$(cat ./temp_files/ecs_cluster_arn.txt) \
-&& sed -e "s@ARN_HERE@${ecs_arn}\\\@g" \
-json_models/ivs_events_rule_model.json > ./json_configs/ivs_events_rule.json
-```
-
-##### 6.2 Create the Amazon EventBridge rule named ip-register
-
-```
-aws events put-rule --cli-input-json file://json_configs/ivs_events_rule.json \
-| jq '.RuleArn' | sed 's/"//g' > ./temp_files/ivs_event_rule_arn.txt
-```
-
-##### 6.3 Creating the resource policy template
-
-```
-aws lambda get-function --function-name ivs-ip-register \
-| jq '.Configuration.FunctionArn' | sed 's/"//g' \
-> ./temp_files/ivs_lambda_function_arn.txt
-```
-##### 6.4 Adding permission to ip-register rule invoke lambda funtion ivs-ip-register
-
-```
-aws lambda add-permission --function-name ivs-ip-register \
---action lambda:InvokeFunction --statement-id events \
---principal events.amazonaws.com --source-arn=$(cat ./temp_files/ivs_event_rule_arn.txt)
-```
-
-##### 6.5 Add lambda function ivs-ip-register as a target to the event rule ip-register
-
-```
-aws events remove-targets --rule ip-register --ids "1" \
-&& aws events put-targets --rule ip-register \
---targets "Id"="1","Arn"="$(cat ./temp_files/ivs_lambda_function_arn.txt)"
-```
-#### 7. Creating cloudwatch log group name for ivs-webrtc tasks
-
-This will create the log group name /ecs/ivs-webrtc in cloudwatchlogs. This log group will receive the logs from the Fargate tasks.
-
-```
-aws logs create-log-group --log-group-name /ecs/ivs-webrtc
-```
-
-#### 8. Adjusting the Amazon ECS Service ivs-webrtc
-
-This last step will allow ivs-webrtc to create two tasks and the automation (EventBridge, Lambda) will register the public ip's of each task to DynamoDB ivs-task-dns-track table.
-
-##### 8.1 Configures the ivs-webrtc service run two tasks
-
-```
-aws ecs update-service --cluster ivs --service ivs-webrtc --desired-count 2
-```
-
-### B- Frontend and APIS: webRTC video capture 
-
-#### 1. Project Dependencies
-
-For building the integration with AWS components and host our web application we will be using AWS Amplify. 
-For more complete steps of installing and configure AWS Amplify please visit the documentation (Amplify Documentation (https://docs.amplify.aws/start/getting-started/installation/q/integration/react#option-2-follow-the-instructions) for React). 
-
-```
-  npm install -g @aws-amplify/cli
+  sudo npm install -g @aws-amplify/cli
   amplify configure
 ```
 
-#### 2. Clone the repository solution
-In this session we will install the npm packages, initialize the amplify environment and deploy cloud resources.
+### Step A- Frontend and APIs: WebRTC video capture
+
+#### 1. Clone the repository solution
 
 ```
   git clone https://github.com/aws-samples/aws-simple-streaming-webapp.git
@@ -267,15 +50,15 @@ In this session we will install the npm packages, initialize the amplify environ
   npm install
   amplify init
 ```
-For the environment select **dev**
-Now you need to select the profile created in the previous step, with amplify configure
+As name for the environment, please select **dev**
 
 ```
-  ? Enter a name for the environment dev
+? Enter a name for the environment dev
   ? Choose your default editor: Visual Studio Code
   Using default provider  awscloudformation
   ? Select the authentication method you want to use: AWS profile
 ```
+With **amplify init**, the project and resources are initialized in the AWS Cloud environment.
 
 Now you can list the resources that it's going to be created once we push the environment creation.
 
@@ -292,12 +75,11 @@ Now you can list the resources that it's going to be created once we push the en
   | Api      | saveIVSparam               | Create    | awscloudformation |
 ```
 
-Now you can push with:
+As next step, we need to do a amplify push to deploy the resources in AWS Cloud. 
 
 ```
   amplify push
 ```
-
 {{% notice note %}}
 This Command will deploy the following resources in your account:
 - API Gateway: Save and retrive IVS Parameters and ECS Container availability information
@@ -305,35 +87,61 @@ This Command will deploy the following resources in your account:
 - Lambda Funtions: For checking stored parmeters and check Event Bridge information 
 {{% /notice %}}
 
-#### 3. Run the solution in your local envirolment
+#### 2. Publish and run the Broadcaster app
 
-```
-  npm start
-```
+To have a full HTTPS communication, required for some access to the browser camera APIs, you can publish the app to host it in Amazon S3 and use a CloudFront distribution.
+If you prefer to run the Broadcaster app locally, please see the (backend documentation(https://github.com/aws-samples/aws-simple-streaming-webapp/tree/main/backend)).
 
-#### 4. Application Configuration
-In your local envirolment http://127.0.0.1:3000 the following application will be loaded
-
-<img src="doc/IVSParam.png" alt="IVS Parameters" />
-
-Go to [Amazon Interactive Video Service Console](https://console.aws.amazon.com/ivs/) and copy the parameters to add in the Simple Streaming Solution.
-
-<img src="doc/IVSCopy.png" alt="Copy Parameters" />
-
-Add into the Simple Streaming Solution and Save!
-
-
-If you don't have a channel created on IVS yet, you can follow the 3 simple steps bellow
-
-#### 4.1. Creating a Channel on Amazon Iteractive Video Service
-Lets use the AWS Cli to create our channel. 
-Note: If you prefere, you can create the channel using [Amazon Interactive Video Service Console](https://console.aws.amazon.com/ivs/) 
-
-```
-  aws ivs create-channel --name ivs-webrtc
+ ```
+  amplify publish
 ```
 
-#### 4.2. Copy and save the ingestEndpoint and streamKey value
+This command returns a CloudFront distribution. Please copy and open in your browser.
+Your app is now online!
+
+<img src="doc/auth.png" alt="Application Authentication" />
+
+Now you can create your first account by clicking on Create account and sign up.
+
+### Step B - Proxy video transwrap with Amazon ECS container
+
+The proxy transwapper is a compound of two containers running a Node.js web server and FFmpeg. The containers run on AWS Fargate for Amazon Elastic Container Service (Amazon ECS). AWS Fargate is a serverless compute engine for containers that work with Amazon ECS, and Amazon Elastic Kubernetes Service (Amazon EKS). 
+
+The services AWS CodeBuild and Amazon Elastic Container Registry build, store, and manage the proxy transwrap container images. AWS CodeBuild is a fully managed continuous integration service that compiles source code, runs tests, and produces software packages that are ready to deploy. Amazon Elastic Container Registry (Amazon ECR) is a fully managed container registry that makes it easy to store, manage, share, and deploy your container images and artifacts anywhere.
+ 
+In Amazon ECS, you have three building blocks to run your containers successfully:
+ 
+1.	Task definition: This is like a blueprint for your application, where you can define which container images to use and the resources that your container requires.
+2.	Task: This is the instantiation of your task definition.
+3.	Service: This launches and maintains a specified number of copies of the task definition in your cluster.
+ 
+In this case, we have a service with two tasks, and each has its own public IP to receive the video stream via WebSocket.
+ 
+To track each task public IP, we use Amazon EventBridge, AWS Lambda, and Amazon DynamoDB.
+ 
+•	Amazon EventBridge: This is a serverless event bus that makes it easier to build event-driven applications at scale using events generated from your applications, integrated software as a service (SaaS) applications, and AWS services. In this case, we built a rule in Amazon EventBridge to track our tasks' start and stop status and trigger the AWS Lambda function.
+•	AWS Lambda: This is a serverless compute service that lets you run code without: provisioning or managing servers; creating workload-aware cluster scaling logic; maintaining event integrations; or managing runtimes. In this case, we built an AWS Lambda Function that, when triggered by the Amazon EventBridge, updates the public IP of the tasks in an Amazon DynamoDB table.
+•	Amazon DynamoDB: This is a key-value and document database that delivers single-digit millisecond performance at any scale. It's a fully managed, multi-Region, multi-active, durable database with built-in security, backup and restores, and in-memory caching for internet-scale applications. In this case, we use an Amazon DynamoDB table to store the metadata of the tasks. The public IP of the tasks is part of the metadata.
+ 
+The backend deployment is built using a bash shell script located under simple-streaming-webapp/backend that runs AWS CLI commands to build the environment.
+
+#### 1. Deploy the backend environment
+
+```
+  cd simple-streaming-webapp/backend
+  ./install_ivs_backend.sh deploy all
+```
+
+### Step C. Application setup 
+You can skip this task if you already have an Amazon IVS channel created. For more details, please visit 8Amazon IVS documentation(https://docs.aws.amazon.com/ivs/)).
+
+#### 1. Create a channel on Amazon IVS
+
+```
+  ./create_ivs_channel.sh ivs-webrtc
+```
+
+#### 2. Copy and save the ingestEndpoint, streamKey value, and playbackUrl 
 
 ```
   Copy EndPoint: rtmps://6f0eda55d6df.global-contribute.live-video.net:443/app/
@@ -343,39 +151,37 @@ Note: If you prefere, you can create the channel using [Amazon Interactive Video
   Copy playbackUrl: https://8f97718d90a0.us-east-1.playback.live-video.net/api/video/v1/us-east-1.098435415742.channel.cxhSJCwxyiyF.m3u8
 ```
 
-#### 4.3. Add the ingestEndpoint, streamKey value and playbackUrl to the interface
+#### 3. Add the ingestEndpoint, streamKey value and playbackUrl to the interface
 
-<img src="doc/IVSAddParam.png" alt="IVS Parameters" />
+<img src="doc/config.png" alt="Application config" />
 
-#### 5. Test your live streaming from your browser
+### Step D. Test your live stream with your browser
+Select your preferred camera and audio input and click on Go Live!
 
-Select your prefered camera and audio input and click on Go Live!
+<img src="doc/golive.png" alt="Application live" />
 
-<img src="doc/ISSSLive.png" alt="You Are Live" />
-
-## 6. (Optional): Cleanup, removing the provisioned AWS resources.
-
-For removing the Broadcaster producer APP 
-If you need to remove the resources deployed by this sample, you can use the command below:
+### Step E. Clean up: remove the provisioned AWS resources 
+#### 1. Removing the Broadcaster application 
+If you need to remove the resources deployed by this sample, you can use the following command:
 
 ```
   amplify delete
 ```
-
-For removing the Transwrap proxy server, you can use the bash script uninstall_ivs_backend.sh
+#### 2. Remove the Transwrap proxy server
+To remove the Transwrap proxy server, use the bash script uninstall_ivs_backend.sh
 
 ```
-  cd backend
-  ./uninstall_ivs_backend.sh
+cd backend
+./uninstall_ivs_backend.sh clean all
 ```
+## Conclusion
+In this blog post, we showed you how to create a serverless live stream reference architecture using AWS services Amazon IVS, AWS Lambda, Amazon EventBridge, Amazon DynamoDB, AWS Fargate, and AWS Amplify.
+
+A reminder that this is a reference solution is not for use in a production environment, but is ideal for testing and accelerating your cloud adoption. Please reach your AWS representative, or here, for more information on architecting a custom solution for large-scale production-grade events.
 
 ## Notice
 
 ! This project uses FFMPG, http://www.ffmpeg.org, please check lisensing usage.
-
-## Limitations and Considerations
-
-This is a reference solution ideal for testing and accelerates your cloud adoption. Designed for short-duration events. Please reach your AWS representative for architecting a custom solution for large-scale production-grade events.
 
 ## Security
 
