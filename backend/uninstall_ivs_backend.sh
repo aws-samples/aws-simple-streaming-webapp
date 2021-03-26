@@ -245,7 +245,7 @@ function iam_deprov () {
 	# Test if it exists
 	aws iam delete-role --role-name ivs-lambda-role > /dev/null 2>&1 && iam='OK' || iam='NOK'
 	
-	if [ $iam = 'OK' ]
+	if [ $iam = 'NOK' ]
 	then
 	
 		echo -e "${GREEN}Deleting role ivs-lambda-role...${NC}"
@@ -253,14 +253,14 @@ function iam_deprov () {
 
 	else 
 		
-		echo -e "${RED}It seems you have already deleted the ivs-lambda-role policy!!!${NC}"
+		echo -e "${RED}It seems you have already deleted the ivs-lambda-role!!!${NC}"
 		
 	fi
 	
 	# Test if it exists
-	aws iam delete-role --role-name ivs-lambda-role > /dev/null 2>&1 && ecs='OK' || ecs='NOK'
+	aws iam delete-role --role-name ivs-ecs-execution-role > /dev/null 2>&1 && ecs='OK' || ecs='NOK'
 	
-	if [ $ecs = 'OK' ]
+	if [ $ecs = 'NOK' ]
 	then
 	
 		echo -e "${GREEN}Deleting role ivs-ecs-execution-role...${NC}"
@@ -268,7 +268,7 @@ function iam_deprov () {
 		
 	else
 	
-		echo -e "${RED}It seems you have already deleted the ivs-ecs-execution-role policy!!!${NC}"
+		echo -e "${RED}It seems you have already deleted the ivs-ecs-execution-role!!!${NC}"
 	
 	fi
 }
