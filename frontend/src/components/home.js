@@ -146,7 +146,7 @@ function Home (props) {
         <div>
           <div className="container fluid" style={{backgroundColor: "#262626"}}>
               <div className="headerPlayer">
-                <h1>Simple IVS Streming</h1>
+                <h1>IVS Simple Streaming</h1>
               </div>
           </div>
           <div className="enCamera">

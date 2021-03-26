@@ -341,7 +341,7 @@ const startStreaming = async (e) =>{
     return devices.videoin ? (
       <div className="App">
       <div className="container-fluid">
-        <h1>IVS Simple Streming v2</h1>
+        <h1>IVS Simple Streaming</h1>
         {errorMSG && (
             <div className="errorMSG">
               <p>Please enable your Camera, check browser Permissions.</p>
