@@ -1,0 +1,36 @@
+{
+    "name": "ivs-webrtc",
+    "source": {
+      "type": "S3",
+      "location": "REPLACE_BUCKET/docker.zip"
+    },
+    "artifacts": {
+      "type": "NO_ARTIFACTS"
+    },
+    "environment": {
+      "type": "LINUX_CONTAINER",
+      "image": "aws/codebuild/standard:4.0",
+      "computeType": "BUILD_GENERAL1_SMALL",
+      "environmentVariables": [
+        {
+          "name": "AWS_DEFAULT_REGION",
+          "value": "us-east-1"
+        },
+        {
+          "name": "AWS_ACCOUNT_ID",
+          "value": "REPLACE_ACCOUNTID"
+        },
+        {
+          "name": "IMAGE_REPO_NAME",
+          "value": "ivs-webrtc"
+        },
+        {
+          "name": "IMAGE_TAG",
+          "value": "latest"
+        }
+      ],
+      "privilegedMode": true
+    },
+    "serviceRole": "REPLACE_ROLE",
+    "encryptionKey": "arn:aws:kms:us-east-1:REPLACE_ACCOUNTID:alias/aws/s3"
+  }

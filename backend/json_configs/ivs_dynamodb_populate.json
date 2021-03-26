@@ -1,5 +1,5 @@
 {
-    "ivs-task-dns-track": [
+    "ISS-task-dns-track-dev": [
         {
             "PutRequest": {
                 "Item": {

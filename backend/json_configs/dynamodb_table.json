@@ -5,7 +5,7 @@
                 "AttributeType": "S"
             }
         ],
-        "TableName": "ivs-task-dns-track",
+        "TableName": "ISS-task-dns-track-dev",
         "KeySchema": [
             {
                 "AttributeName": "role",

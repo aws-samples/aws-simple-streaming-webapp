@@ -8,7 +8,7 @@ ec2 = boto3.resource('ec2')
 dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
 
 # Set DynamoDB Table
-table = dynamodb.Table('ivs-task-dns-track')
+table = dynamodb.Table('ISS-task-dns-track-dev')
 
 def get_values():
 

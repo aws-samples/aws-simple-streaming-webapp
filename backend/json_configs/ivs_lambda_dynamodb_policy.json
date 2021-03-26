@@ -12,8 +12,8 @@
                 "dynamodb:UpdateItem"
             ],
             "Resource": [
-                "arn:aws:dynamodb:*:*:table/ivs-task-dns-track",
-                "arn:aws:dynamodb:*:*:table/ivs-task-dns-track/index/*"
+                "arn:aws:dynamodb:*:*:table/ISS-task-dns-track-dev",
+                "arn:aws:dynamodb:*:*:table/ISS-task-dns-track-dev/index/*"
             ]
         }
     ]
