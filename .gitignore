@@ -28,6 +28,9 @@
 /frontend/src/aws-video-exports.js
 /frontend/src/aws-exports.js
 /frontend/package-lock.json
+/frontend/amplify/backend/function/ISSgetServers/dist/latest-build.zip
+/frontend/amplify/backend/function/saveIVSparam/dist/latest-build.zip
+/frontend/amplify/README.md
 
 
 
