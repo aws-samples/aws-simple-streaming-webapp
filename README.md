@@ -181,7 +181,7 @@ A reminder that this is a reference solution is not for use in a production envi
 
 ## Notice
 
-! This project uses FFMPG, http://www.ffmpeg.org, please check lisensing usage.
+This project uses FFMPG, http://www.ffmpeg.org, please check lisensing usage.
 
 ## Security
 
