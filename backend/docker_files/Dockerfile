@@ -33,8 +33,5 @@ COPY src* /opt/ivs-simple-webrtc/
 # Copy health-check.html to /opt/ivs-simple-webrtc/www/ folder
 COPY health* /opt/ivs-simple-webrtc/www/
 
-RUN ls -l /opt/ivs-simple-webrtc/transwraper.js
-RUN cat /opt/ivs-simple-webrtc/transwraper.js
-
 # Start webserver
 CMD ["pm2-runtime","/opt/ivs-simple-webrtc/transwrap.js","-i max"]

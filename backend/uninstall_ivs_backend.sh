@@ -70,7 +70,7 @@ function codebuild_rp_deprov () {
 	# This deletes the roles and policies required by codebuild
 
 	# Array that stores all policies arn that should be detached
-	codebuild_policies_to_detach=($(cat ./temp_files/ivs_codebuild_log_arn.txt) \
+	codebuild_policies=($(cat ./temp_files/ivs_codebuild_log_arn.txt) \
 	$(cat ./temp_files/ivs_codebuild_s3_arn.txt) \
 	$(cat ./temp_files/ivs_codebuild_vpc_arn.txt) \
 	$(cat ./temp_files/ivs_codebuild_base_arn.txt) \
@@ -80,10 +80,10 @@ function codebuild_rp_deprov () {
 	codebuild_roles_to_delete=('ivs-webrtc-codebuild-role')
 	
 	# Calls detach_policy passing the policies array as argument
-	detach_policy ${codebuild_policies_to_detach[@]} ivs-webrtc-codebuild-role
+	detach_policy ${codebuild_policies[@]} ivs-webrtc-codebuild-role
 
 	# Calls delete_policy passing the policies array as argument
-	delete_policy ${codebuild_policies_to_detach[@]} 
+	delete_policy ${codebuild_policies[@]} 
 
 	# Calls delete_role passing the policies array as argument
 	delete_role ${codebuild_roles_to_delete[@]} 
@@ -273,6 +273,12 @@ function detach_policy () {
 	do
 
 		# Go to next register case file does not exist
+		if [ $i = 'ivs-webrtc-codebuild-role' ] || [ $i = 'ivs-lambda-role' ] || [ $i = 'ivs-ecs-execution-role' ]
+		then 
+
+			continue
+
+		fi
 		
 		p_name=$(echo -e ${i} | sed 's:.*/::')
 		
@@ -295,6 +301,12 @@ function delete_policy () {
 	do
 
 		# Go to next register case file does not exist
+		if [ $i = 'ivs-webrtc-codebuild-role' ] || [ $i = 'ivs-lambda-role' ] || [ $i = 'ivs-ecs-execution-role' ]
+		then 
+
+			continue
+			
+		fi
 
 		# Captures the name of the policies
     	r_name=$(echo -e ${i} | sed 's:.*/::')
@@ -311,6 +323,8 @@ function delete_policy () {
 function delete_role () {
 
 	# This function deletes roles
+
+	echo -e "${GREEN}Deleting roles...${NC}"
 
 	# Iterate over the arguments and deletes role by role
 	for i in ${@}
@@ -331,9 +345,10 @@ function iam_deprov () {
 	# This function will delete all IAM roles and policies created to ivs-webrtc project
 
 	# Array that stores all policies arn that should be detached
-	policies_to_detach=($(cat ./temp_files/lambda_policy_arn.txt) "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" \
-	"arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess" "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy" \
-	"arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs")
+	policies_lambda=($(cat ./temp_files/lambda_policy_arn.txt) "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" \
+	"arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess" "arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs")
+
+	policies_ecs=("arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy")
 
 	# Array that stores all policies arn that should be deleted
 	policies_to_delete=($(cat ./temp_files/lambda_policy_arn.txt))
@@ -342,10 +357,10 @@ function iam_deprov () {
 	roles_to_delete=('ivs-ecs-execution-role' 'ivs-lambda-role')
 	
 	# Calls detach_policy passing the policies array as argument
-	detach_policy ${policies_to_detach[@]} ivs-lambda-role
+	detach_policy ${policies_lambda[@]} ivs-lambda-role
 
 	# Calls detach_policy passing the policies array as argument
-	detach_policy ${policies_to_detach[@]} ivs-ecs-execution-role
+	detach_policy ${policies_ecs[@]} ivs-ecs-execution-role
 
 	# Calls delete_policy passing the policies array as argument
 	delete_policy ${policies_to_delete[@]} 
