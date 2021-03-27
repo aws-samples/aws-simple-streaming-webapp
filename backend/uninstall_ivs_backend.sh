@@ -68,8 +68,6 @@ function codebuild_deprov () {
 function codebuild_rp_deprov () {
 
 	# This deletes the roles and policies required by codebuild
-	
-	iam_role="ivs-webrtc-codebuild-role"
 
 	# Array that stores all policies arn that should be detached
 	codebuild_policies_to_detach=($(cat ./temp_files/ivs_codebuild_log_arn.txt) \
@@ -82,7 +80,7 @@ function codebuild_rp_deprov () {
 	codebuild_roles_to_delete=('ivs-webrtc-codebuild-role')
 	
 	# Calls detach_policy passing the policies array as argument
-	detach_policy ${codebuild_policies_to_detach[@]} 
+	detach_policy ${codebuild_policies_to_detach[@]} ivs-webrtc-codebuild-role
 
 	# Calls delete_policy passing the policies array as argument
 	delete_policy ${codebuild_policies_to_detach[@]} 
@@ -245,31 +243,6 @@ function security_group_deprov () {
 	fi
 }
 
-# ################################################################################
-# # DynamoDB Deprovisioning                                                      #
-# ################################################################################
-
-# function dynamodb_deprov () {
-
-# 	# This function deletes the DynamoDB Table ISS-task-dns-track-dev
-
-# 	# Test if the table ISS-task-dns-track-dev exist and save the result on dynamodb_table variable
-# 	aws dynamodb describe-table --table ISS-task-dns-track-dev > /dev/null 2>&1 && dynamodb_table='OK' || dynamodb_table='NOK'
-
-# 	if [ $dynamodb_table = 'OK' ]
-# 	then
-		
-# 		echo -e "${GREEN}Deleting DynamoDB Table ISS-task-dns-track-dev...${NC}"
-# 		aws dynamodb delete-table --table-name ISS-task-dns-track-dev > /dev/null
-
-# 	else
-
-# 		echo -e "${RED}It seems you have already deleted the DynamoDB Table ISS-task-dns-track-dev!!!${NC}"
-
-# 	fi	
-# }
-
-
 ################################################################################
 # Lambda Deprovisioning                                                        #
 ################################################################################
@@ -304,7 +277,7 @@ function detach_policy () {
 		p_name=$(echo -e ${i} | sed 's:.*/::')
 		
 		# Detaches policies
-		aws iam detach-role-policy --role-name ${iam_role} --policy-arn ${i} \
+		aws iam detach-role-policy --role-name ${@: -1} --policy-arn ${i} \
 		> /dev/null 2>&1 && echo -e "${GREEN}Policy ${p_name} detached${NC}" \
 		|| echo -e "${RED}It seems that ${p_name} was already detached!!!${NC}"
 
@@ -315,7 +288,7 @@ function delete_policy () {
 
 	# This function deletes policies
 
-	echo -e "${GREEN}Deleting roles...${NC}"
+	echo -e "${GREEN}Deleting policies...${NC}"
 
 	# Iterate over the arguments and detaches policy by policy
 	for i in ${@}
@@ -356,11 +329,9 @@ function delete_role () {
 function iam_deprov () {
 
 	# This function will delete all IAM roles and policies created to ivs-webrtc project
-	
-	iam_role="ivs-lambda-role"
 
 	# Array that stores all policies arn that should be detached
-	policies_to_detach=( $(cat ./temp_files/lambda_policy_arn.txt) "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" \
+	policies_to_detach=($(cat ./temp_files/lambda_policy_arn.txt) "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" \
 	"arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess" "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy" \
 	"arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs")
 
@@ -371,7 +342,10 @@ function iam_deprov () {
 	roles_to_delete=('ivs-ecs-execution-role' 'ivs-lambda-role')
 	
 	# Calls detach_policy passing the policies array as argument
-	detach_policy ${policies_to_detach[@]} 
+	detach_policy ${policies_to_detach[@]} ivs-lambda-role
+
+	# Calls detach_policy passing the policies array as argument
+	detach_policy ${policies_to_detach[@]} ivs-ecs-execution-role
 
 	# Calls delete_policy passing the policies array as argument
 	delete_policy ${policies_to_delete[@]} 
