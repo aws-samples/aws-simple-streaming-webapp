@@ -37,7 +37,7 @@ To build the integration with AWS components and host our web application, we us
 
 ```
   sudo npm install -g @aws-amplify/cli
-  amplify configure
+  aws configure
 ```
 
 ### Step A- Frontend and APIs: WebRTC video capture
@@ -93,6 +93,8 @@ To have a full HTTPS communication, required for some access to the browser came
 If you prefer to run the Broadcaster app locally, please see the (backend documentation(https://github.com/aws-samples/aws-simple-streaming-webapp/tree/main/backend)).
 
  ```
+  amplify add hosting
+
   amplify publish
 ```
 
