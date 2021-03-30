@@ -1,5 +1,10 @@
 {
-  "hosting": {},
+  "hosting": {
+    "S3AndCloudFront": {
+      "service": "S3AndCloudFront",
+      "providerPlugin": "awscloudformation"
+    }
+  },
   "auth": {
     "simplewebstreaming5fec9bae": {
       "service": "Cognito",
