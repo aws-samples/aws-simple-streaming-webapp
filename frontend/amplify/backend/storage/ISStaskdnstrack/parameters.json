@@ -1,5 +1,0 @@
-{
-    "tableName": "ISS-task-dns-track",
-    "partitionKeyName": "role",
-    "partitionKeyType": "S"
-}
