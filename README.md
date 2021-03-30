@@ -67,6 +67,7 @@ Now you can list the resources that it's going to be created once we push the en
 
   | Category | Resource name              | Operation | Provider plugin   |
   | -------- | -------------------------- | --------- | ----------------- |
+  | Hosting  | S3AndCloudFront            | Create    | awscloudformation |
   | Auth     | simplewebstreaming5fec9bae | Create    | awscloudformation |
   | Storage  | IVSparam                   | Create    | awscloudformation |
   | Storage  | ISStaskdnstrack            | Create    | awscloudformation |
