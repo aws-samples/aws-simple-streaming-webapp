@@ -165,6 +165,7 @@ Select your preferred camera and audio input and click on Go Live!
 If you need to remove the resources deployed by this sample, you can use the following command:
 
 ```
+  cd frontend
   amplify delete
 ```
 #### 2. Remove the Transwrap proxy server
