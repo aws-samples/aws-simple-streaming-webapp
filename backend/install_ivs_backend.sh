@@ -734,6 +734,8 @@ function fargate_adjust_service () {
     echo -e "${GREEN}Adjusting fargate service to 2 tasks...${NC}"
     aws ecs update-service --cluster ivs --service ivs-webrtc --desired-count 2 > /dev/null
 
+    
+
 }
 
 ################################################################################
