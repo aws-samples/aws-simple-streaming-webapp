@@ -22,7 +22,6 @@
 /frontend/amplify/backend/amplify-meta.json
 /frontend/amplify/backend/awscloudformation
 /frontend/amplify/logs/
-/frontend/amplify/hosting
 /frontend/amplify/cli.json
 /frontend/amplify/team-provider-info.json
 /frontend/src/aws-video-exports.js
@@ -30,10 +29,6 @@
 /frontend/amplify/backend/function/ISSgetServers/dist/latest-build.zip
 /frontend/amplify/backend/function/saveIVSparam/dist/latest-build.zip
 /frontend/amplify/README.md
-
-
-
-
 
 #history
 .history

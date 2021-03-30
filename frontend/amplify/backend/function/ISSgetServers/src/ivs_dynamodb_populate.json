@@ -1,0 +1,24 @@
+{
+    "ivs-task-dns-track": [
+        {
+            "PutRequest": {
+                "Item": {
+                    "role": {"S": "primary"},
+                    "eventid": {"S": "ppp"},
+                    "replaced": {"S": "yes"},
+		    "dns": {"S": "ppp"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "role": {"S": "secondary"},
+                    "eventid": {"S": "sss"},
+                    "replaced": {"S": "yes"},
+		    "dns": {"S": "yes"}
+                }
+            }
+        }
+   ]
+}

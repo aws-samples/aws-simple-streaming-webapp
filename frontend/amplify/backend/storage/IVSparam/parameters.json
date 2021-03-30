@@ -1,0 +1,5 @@
+{
+    "tableName": "IVSparam",
+    "partitionKeyName": "username",
+    "partitionKeyType": "S"
+}
