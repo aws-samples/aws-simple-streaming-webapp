@@ -46,7 +46,7 @@ To build the integration with AWS components and host our web application, we us
 
 ```
   git clone https://github.com/aws-samples/aws-simple-streaming-webapp.git
-  cd aws-simple-streaming-webpp/frontend/
+  cd aws-simple-streaming-webapp/frontend/
   npm install
   amplify init
 ```
@@ -177,6 +177,7 @@ To remove the Transwrap proxy server, use the bash script uninstall_ivs_backend.
 ```
 cd backend
 ./uninstall_ivs_backend.sh clean all
+./uninstall_ivs_backend.sh clean files
 ```
 ## Conclusion
 In this blog post, we showed you how to create a serverless live stream reference architecture using AWS services Amazon IVS, AWS Lambda, Amazon EventBridge, Amazon DynamoDB, AWS Fargate, and AWS Amplify.
