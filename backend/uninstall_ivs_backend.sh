@@ -346,9 +346,9 @@ function iam_deprov () {
 
 	# Array that stores all policies arn that should be detached
 	policies_lambda=($(cat ./temp_files/lambda_policy_arn.txt) "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" \
-	"arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess" "arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs")
+	"arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess")
 
-	policies_ecs=("arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy")
+	policies_ecs=("arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy" "arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs")
 
 	# Array that stores all policies arn that should be deleted
 	policies_to_delete=($(cat ./temp_files/lambda_policy_arn.txt))
@@ -550,6 +550,8 @@ function clean () {
 		lambda_deprov || { error_exit 'Failed while removing lambda resources'; }
 		cloudwatchlogs_deprov || { error_exit 'Failed while removing cloudwatch log group!'; }
 		#delete_temp_files || { error_exit 'Failed while removing temporary files!'; }
+		echo -e "${YELLOW}If you dont see any errors, run the command below to delete the temporary files${NC}"
+		echo -e "${GREEN}./uninstall_ivs_backend.sh clean files${NC}"
 		;;
 	
 	codebuild)

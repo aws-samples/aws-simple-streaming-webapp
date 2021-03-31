@@ -201,13 +201,13 @@ function codebuild_iam () {
     if [ ! $codebuild ]
     then
         
-        echo -e "${GREEN}Attaching first policy to AWS Codebuild role...${NC}"
+        echo -e "${GREEN}Attaching ivs_codebuild_ecr policy to AWS Codebuild role...${NC}"
         aws iam create-policy --policy-name ivs_codebuild_ecr --policy-document file://json_configs/ivs_codebuild_ecr_policy.json | jq '.Policy.Arn' | sed 's/"//g' > ./temp_files/ivs_codebuild_ecr_arn.txt
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $(cat ./temp_files/ivs_codebuild_ecr_arn.txt)
         
     else
         
-        echo -e "${GREEN}Attaching first policy to AWS Codebuild role...${NC}"
+        echo -e "${GREEN}Attaching ivs_codebuild_ecr policy to AWS Codebuild role...${NC}"
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $codebuild
     
     fi
@@ -221,13 +221,13 @@ function codebuild_iam () {
     if [ ! $codebuild ]
     then
         
-        echo -e "${GREEN}Attaching second policy to AWS Codebuild role...${NC}"
+        echo -e "${GREEN}Attaching ivs_codebuild_base policy to AWS Codebuild role...${NC}"
         aws iam create-policy --policy-name ivs_codebuild_base --policy-document file://json_configs/ivs_codebuild_base_policy.json | jq '.Policy.Arn' | sed 's/"//g' > ./temp_files/ivs_codebuild_base_arn.txt
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $(cat ./temp_files/ivs_codebuild_base_arn.txt)
         
     else
         
-        echo -e "${GREEN}Attaching second policy to AWS Codebuild role...${NC}"
+        echo -e "${GREEN}Attaching ivs_codebuild_base policy to AWS Codebuild role...${NC}"
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $codebuild
     
     fi
@@ -241,13 +241,13 @@ function codebuild_iam () {
     if [ ! $codebuild ]
     then
         
-        echo -e "${GREEN}Attaching third policy to AWS Codebuild role...${NC}"
+        echo -e "${GREEN}Attaching ivs_codebuild_vpc policy to AWS Codebuild role...${NC}"
         aws iam create-policy --policy-name ivs_codebuild_vpc --policy-document file://json_configs/ivs_codebuild_vpc_policy.json | jq '.Policy.Arn' | sed 's/"//g' > ./temp_files/ivs_codebuild_vpc_arn.txt
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $(cat ./temp_files/ivs_codebuild_vpc_arn.txt)
         
     else
         
-        echo -e "${GREEN}Attaching third policy to AWS Codebuild role...${NC}"
+        echo -e "${GREEN}Attaching ivs_codebuild_vpc policy to AWS Codebuild role...${NC}"
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $codebuild
     
     fi
@@ -261,13 +261,13 @@ function codebuild_iam () {
     if [ ! $codebuild ]
     then
         
-        echo -e "${GREEN}Attaching fourth policy to AWS Codebuild role...${NC}"
+        echo -e "${GREEN}Attaching ivs_codebuild_s3 policy to AWS Codebuild role...${NC}"
         aws iam create-policy --policy-name ivs_codebuild_s3 --policy-document file://json_configs/ivs_codebuild_s3_policy.json | jq '.Policy.Arn' | sed 's/"//g' > ./temp_files/ivs_codebuild_s3_arn.txt
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $(cat ./temp_files/ivs_codebuild_s3_arn.txt)
         
     else
         
-        echo -e "${GREEN}Attaching fourth policy to AWS Codebuild role...${NC}"
+        echo -e "${GREEN}Attaching ivs_codebuild_s3 policy to AWS Codebuild role...${NC}"
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $codebuild
     
     fi
@@ -281,13 +281,13 @@ function codebuild_iam () {
     if [ ! $codebuild ]
     then
         
-        echo -e "${GREEN}Attaching last policy to AWS Codebuild role...${NC}"
+        echo -e "${GREEN}Attaching ivs_codebuild_log policy to AWS Codebuild role...${NC}"
         aws iam create-policy --policy-name ivs_codebuild_log --policy-document file://json_configs/ivs_codebuild_log_policy.json | jq '.Policy.Arn' | sed 's/"//g' > ./temp_files/ivs_codebuild_log_arn.txt
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $(cat ./temp_files/ivs_codebuild_log_arn.txt)
         
     else
         
-        echo -e "${GREEN}Attaching last policy to AWS Codebuild role...${NC}"
+        echo -e "${GREEN}Attaching ivs_codebuild_log policy to AWS Codebuild role...${NC}"
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $codebuild
     
     fi
@@ -436,9 +436,9 @@ function iam_resources () {
     unset iam
     
     # Attach the required policies to AWS Lambda execution role you just created.
-    echo -e "${GREEN}Attaching first policy to AWS Lambda execution role...${NC}"
+    echo -e "${GREEN}Attaching AWSLambdaBasicExecutionRole policy to AWS Lambda execution role...${NC}"
     aws iam attach-role-policy --role-name ivs-lambda-role --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-    echo -e "${GREEN}Attaching second policy to AWS Lambda execution role...${NC}"
+    echo -e "${GREEN}Attaching AmazonEC2ReadOnlyAccess policy to AWS Lambda execution role...${NC}"
     aws iam attach-role-policy --role-name ivs-lambda-role --policy-arn arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess 
     
     iam=$(aws iam list-policies --scope Local | jq '.Policies[] | select(.PolicyName=="ivs_dynamodb")' | jq '.Arn' | sed 's/"//g')
@@ -447,13 +447,13 @@ function iam_resources () {
     if [ ! $iam ]
     then
         
-        echo -e "${GREEN}Attaching last policy to AWS Lambda execution role...${NC}"
+        echo -e "${GREEN}Attaching ivs_dynamodb policy to AWS Lambda execution role...${NC}"
         aws iam create-policy --policy-name ivs_dynamodb --policy-document file://json_configs/ivs_lambda_dynamodb_policy.json | jq '.Policy.Arn' | sed 's/"//g' > ./temp_files/lambda_policy_arn.txt
         aws iam attach-role-policy --role-name ivs-lambda-role --policy-arn $(cat ./temp_files/lambda_policy_arn.txt)
         
     else
         
-        echo -e "${GREEN}Attaching last policy to AWS Lambda execution role...${NC}"
+        echo -e "${GREEN}Attaching ivs_dynamodb policy to AWS Lambda execution role...${NC}"
         aws iam attach-role-policy --role-name ivs-lambda-role --policy-arn $(aws iam list-policies --scope Local | jq '.Policies[] | select(.PolicyName=="ivs_dynamodb")' | jq '.Arn' | sed 's/"//g')
     
     fi

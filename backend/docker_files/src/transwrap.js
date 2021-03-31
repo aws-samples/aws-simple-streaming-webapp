@@ -14,8 +14,8 @@ const servertype = 'HTTPS'
 const home = 'wwww' /// for heath check only, you can also use as standalone server, by moving the frontend folder to the home www
 
 // https certificates // Be sure to generate those before running
-const newCert =  'cert.pem';
-const newKey = 'key.pem'
+const newCert =  '/opt/ivs-simple-webrtc/cert.pem';
+const newKey = '/opt/ivs-simple-webrtc/key.pem'
 const certicates = {
   key: fs.readFileSync(newKey),
   cert: fs.readFileSync(newCert)
