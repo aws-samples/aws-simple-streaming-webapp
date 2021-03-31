@@ -550,6 +550,8 @@ function clean () {
 		lambda_deprov || { error_exit 'Failed while removing lambda resources'; }
 		cloudwatchlogs_deprov || { error_exit 'Failed while removing cloudwatch log group!'; }
 		#delete_temp_files || { error_exit 'Failed while removing temporary files!'; }
+		echo -e "${YELLOW}If you dont see any errors, run the command below to delete the temporary files${NC}"
+		echo -e "${GREEN}./uninstall_ivs_backend.sh clean files${NC}"
 		;;
 	
 	codebuild)
