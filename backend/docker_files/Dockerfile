@@ -33,5 +33,9 @@ COPY src* /opt/ivs-simple-webrtc/
 # Copy health-check.html to /opt/ivs-simple-webrtc/www/ folder
 COPY health* /opt/ivs-simple-webrtc/www/
 
+# Delete after the tests
+RUN ls -lah /opt/ivs-simple-webrtc/key.pem
+RUN ls -lah /opt/ivs-simple-webrtc/cert.pem
+
 # Start webserver
 CMD ["pm2-runtime","/opt/ivs-simple-webrtc/transwrap.js","-i max"]

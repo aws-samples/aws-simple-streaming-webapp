@@ -346,9 +346,9 @@ function iam_deprov () {
 
 	# Array that stores all policies arn that should be detached
 	policies_lambda=($(cat ./temp_files/lambda_policy_arn.txt) "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" \
-	"arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess" "arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs")
+	"arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess")
 
-	policies_ecs=("arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy")
+	policies_ecs=("arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy" "arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs")
 
 	# Array that stores all policies arn that should be deleted
 	policies_to_delete=($(cat ./temp_files/lambda_policy_arn.txt))
