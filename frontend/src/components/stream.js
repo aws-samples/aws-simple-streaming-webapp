@@ -284,9 +284,10 @@ const fallbackServer = (err) => {
 const startStreaming = async (e) =>{
     e.preventDefault();
     console.log("got SERVERS!", wrapServers.primaryServer);
-    let protocol = window.location.protocol.replace('http', 'ws');
+    let serverPri = wrapServers.primaryServer
+    let protocol = window.location.protocol.replace('https', 'wss');
     let localtest = '//127.0.0.1:3004'
-    let wsUrl = `${protocol}//${localtest}/rtmps/${rtmpURL}${streamKey}`;
+    let wsUrl = `${protocol}//${serverPri}/rtmps/${rtmpURL}${streamKey}`;
 
     wsRef.current = new WebSocket(wsUrl)
     console.log("como esta o wsRef", wsRef)

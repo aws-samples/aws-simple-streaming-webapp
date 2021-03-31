@@ -35,7 +35,7 @@ exports.handler = async (event) => {
         return resp
         } else {
             //if no data, then load some dummy data
-            let servers = [{"role":"primary","dns":"ec2-3-235-3-206.compute-1.amazonaws.com\\n","eventid":"sss","replaced":"no"},{"role":"secondary","dns":"ec2-3-83-82-164.compute-1.amazonaws.com","eventid":"sss","replaced":"no"}]
+            let servers = [{"role":"primary","dns":"ec2-3-235-3-206.compute-1.amazonaws.com","eventid":"sss","replaced":"no"},{"role":"secondary","dns":"ec2-3-83-82-164.compute-1.amazonaws.com","eventid":"sss","replaced":"no"}]
             for (const [index, server] of servers.entries()){
                 // dynamoDB params                
                  var params = {

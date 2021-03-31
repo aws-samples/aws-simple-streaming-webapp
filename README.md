@@ -57,6 +57,7 @@ As name for the environment, please select **dev**
   ? Choose your default editor: Visual Studio Code
   Using default provider  awscloudformation
   ? Select the authentication method you want to use: AWS profile
+  
 ```
 With **amplify init**, the project and resources are initialized in the AWS Cloud environment.
 
@@ -94,9 +95,8 @@ To have a full HTTPS communication, required for some access to the browser came
 If you prefer to run the Broadcaster app locally, please see the (backend documentation(https://github.com/aws-samples/aws-simple-streaming-webapp/tree/main/backend)).
 
  ```
-  amplify add hosting
-
   amplify publish
+
 ```
 
 This command returns a CloudFront distribution. Please copy and open in your browser.
@@ -149,9 +149,9 @@ You can skip this task if you already have an Amazon IVS channel created. For mo
 ```
   Copy EndPoint: rtmps://6f0eda55d6df.global-contribute.live-video.net:443/app/
 
-  Copy StreamKey: sk_us-east-1_siFTKMADpmqe_dzUYPKAZjbE1lcrbQdudLA8sASWAqN
+  Copy StreamKey: sk_us-east-1_siFTKMADpmqe_dzUYPKAZjbE1lcrbQdudLAxyzw
 
-  Copy playbackUrl: https://8f97718d90a0.us-east-1.playback.live-video.net/api/video/v1/us-east-1.098435415742.channel.cxhSJCwxyiyF.m3u8
+  Copy playbackUrl: https://8f97718d90a0.us-east-1.playback.live-video.net/api/video/v1/us-east-1.098435415742.channel.cxyzwe.m3u8
 ```
 
 #### 3. Add the ingestEndpoint, streamKey value and playbackUrl to the interface

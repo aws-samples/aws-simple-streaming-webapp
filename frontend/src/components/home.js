@@ -152,7 +152,7 @@ function Home (props) {
           <div className="enCamera">
             <div>
               <p>Welcome {username}</p>
-              <p>This is a simple webRTC broadcast Sample Demo. Amazon Interactive Video Service, for more details please contact <a href="https://phonetool.amazon.com/users/osmarb">osmarb@</a></p>
+              <p>This is a simple contribution web application to Amazon Interactive Video Service, for more details please visit the project <a href="https://github.com/aws-samples/aws-simple-streaming-webapp">GitHub</a></p>
             </div>
               {configured | apiResult && (  
                 <button className="buttonEncam" type="submit" onClick={gotoCam}>Enable Cam!</button>
