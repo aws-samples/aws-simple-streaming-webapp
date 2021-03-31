@@ -413,7 +413,7 @@ function delete_temp_files () {
 	'./json_configs/ivs_codebuild_s3_policy.json' './json_configs/ivs_codebuild_log_policy.json' './json_configs/ivs_codebuild.json' './temp_files/codebuild_subnets.txt' \
 	'./json_configs/ivs_codebuild_vpc_policy.json' './temp_files/ivs_webrtc_codebuild_role_arn.txt' './temp_files/ivs_codebuild_ecr_arn.txt' './temp_files/ivs_codebuild_base_arn.txt' \
 	'./temp_files/ivs_codebuild_vpc_arn.txt' './temp_files/ivs_codebuild_s3_arn.txt' './temp_files/ivs_codebuild_log_arn.txt' './temp_files/ivs_codebuild_build.json' \
-	'./temp_files/ecr_uri.txt' './temp_files/accountid.txt' './docker_files/docker.zip')
+	'./temp_files/ecr_uri.txt' './temp_files/accountid.txt' './docker_files/docker.zip' ./temp_files/ivs_codebuild_arn.txt)
 
 	delete_file ${files[@]}
 
