@@ -160,6 +160,9 @@ You can skip this task if you already have an Amazon IVS channel created. For mo
 
 ### Step D. Test your live stream with your browser
 Select your preferred camera and audio input and click on Go Live!
+{{% /notice %}}
+You might need to allow your browser to open the WebSocket URL HTTPS self-signed certificate. The broadcaster app will check the connection state, showing the status of the socket connection. If the browser blocks the connection, an action button to open the URL will be displayed.
+{{% /notice %}}
 
 <img src="doc/golive.png" alt="Application live" />
 
