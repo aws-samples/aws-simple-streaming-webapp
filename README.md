@@ -130,7 +130,7 @@ The backend deployment is built using a bash shell script located under simple-s
 #### 1. Deploy the backend environment
 
 ```
-  cd simple-streaming-webapp/backend
+  cd ../backend/
   ./install_ivs_backend.sh deploy all
 ```
 
