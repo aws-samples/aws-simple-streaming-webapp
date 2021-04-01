@@ -32,6 +32,8 @@ const constraints = { audio: {autoplay: true, deviceId: aDevID}, video: { width:
 const rtmpURL = props.location.state.rtmpURL
 const streamKey = props.location.state.streamKey
 const playURL= props.location.state.playURL
+const [isCertenabled, setCertenabled] = useState(true);
+
 
 useEffect(()=>{
   
@@ -88,6 +90,9 @@ const getServers = () =>  {
     } else {
       console.log("There are", servers.Items[0].dns, servers.Items[1].dns)
       setWrapServers({primaryServer:servers.Items[0].dns, secondaryServer:servers.Items[1].dns})
+      let server1 = servers.Items[0].dns
+      let server2 = servers.Items[1].dns
+      testCert(server1, server2)
     }
   })
   .catch(error => {
@@ -95,10 +100,60 @@ const getServers = () =>  {
   });
 }
 
+const testCert = (server1, server2) => {
+  if (server1 === undefined ){
+    var server1 = wrapServers.primaryServer
+    var server2 = wrapServers.secondaryServer
+
+  }
+
+  let protocol = window.location.protocol.replace('http', 'wss');
+  let wsUrl = `${protocol}//${server1}/rtmps/${rtmpURL}${streamKey}`;
+
+  console.log("LOOP check cert", server1, server2)
+  wsRef.current = new WebSocket(wsUrl);
+
+  wsRef.current.onerror = err => {
+    console.error("ERROR check cert", err)
+  }
+  wsRef.current.onclose = e => {
+      console.log ("It's Closed",  e.code, e)
+      if (e.code == 1006){
+        console.log("timeout")
+        setCertenabled(false)
+
+      }
+      if (e.code == 1015){
+        console.log("tls error")
+        setCertenabled(false)
+      }
+  }
+  wsRef.current.addEventListener('open', async function open(data) {
+    console.log("Open!!!", data)
+    setCertenabled(true)
+  });
+}
+
 // U2.1 - in case IVS is not configured
 const redirTo = () => {
   console.error("Not Configured or Time out API")
   window.location.assign('/') /// trocar para redir
+}
+
+
+const openServer1 = async () => {
+  let url = `https://${wrapServers.primaryServer}`
+  console.log("Opening url", url)
+  window.open(url, '_blank').focus();
+  await sleep(25000);
+  console.log("Going to check again")
+  testCert()
+}
+
+const openServer2 = () => {
+  let url = `https://${wrapServers.secondaryServer}`
+  console.log("Opening url", url)
+  window.open(url, '_blank').focus();
 }
 
 // C3 enable camera 
@@ -200,6 +255,7 @@ return (
   <div>{<VideoPlayer { ...{
     autoplay: true,
     controls: true,
+    muted: true,
     width: 640,
     height: 360,
     bigPlayButton: true,
@@ -237,7 +293,7 @@ const stopStreaming = () => {
 const fallbackServer = (err) => {
   console.log("got SERVERS!", wrapServers.secondaryServer);
   let serverSec = wrapServers.secondaryServer
-  let protocol = window.location.protocol.replace('https', 'wss');
+  let protocol = window.location.protocol.replace('http', 'wss'); // if tou are running in http, please change from https to http, to test transwrap_local change from wss to ws
   let testserver = "//127.0.0.1:3004" // if you need to perform test locally you can use the internal 
   let wsUrlFal = `${protocol}//${serverSec}/rtmps/${rtmpURL}${streamKey}`;
 
@@ -405,7 +461,24 @@ const startStreaming = async (e) =>{
             </div>
             </div>       
           <div className="row">
-          {!status.isStreaming &&(
+          {!isCertenabled &&(
+            <div className="enCert">
+              <div className="row">
+
+                <h5>Please open the server 1 and 2 https url and enable the self signed certificate before streaming:</h5>
+
+              </div>
+              <div className="row">
+              <br/>
+
+
+                <button type="submit" className="formBoten" onClick={openServer1}>Open URL Server 1</button>
+                <button type="submit" className="formBoten" onClick={openServer2}>Open URL Server 2</button>
+              </div>
+            </div>
+          )}
+          
+          {isCertenabled && !status.isStreaming &&(
           <div className="form-group">
             <form className="form-URL">
               <label className="formLabel">
