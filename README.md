@@ -83,7 +83,7 @@ As next step, we need to do a amplify push to deploy the resources in AWS Cloud.
   amplify push
 ```
 
-! This Command will deploy the following resources in your account:
+**This Command will deploy the following resources in your account:**
 - API Gateway: Save and retrive IVS Parameters and ECS Container availability information
 - DynamoDB: Store IVS and Container servers parameters
 - Lambda Funtions: For checking stored parmeters and check Event Bridge information 
@@ -160,7 +160,7 @@ You can skip this task if you already have an Amazon IVS channel created. For mo
 ### Step D. Test your live stream with your browser
 Select your preferred camera and audio input and click on Go Live!
 
-! You might need to allow your browser to open the WebSocket URL HTTPS self-signed certificate. The broadcaster app will check the connection state, showing the status of the socket connection. If the browser blocks the connection, an action button to open the URL will be displayed.
+**You might need to allow your browser to open the WebSocket URL HTTPS self-signed certificate. The broadcaster app will check the connection state, showing the status of the socket connection. If the browser blocks the connection, an action button to open the URL will be displayed.**
 
 
 <img src="doc/golive.png" alt="Application live" />
