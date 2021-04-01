@@ -563,32 +563,11 @@ function vpc_resources () {
     
         aws ec2 describe-security-groups | jq '.SecurityGroups[] | select(.GroupName=="ivs-sg")' | jq '.GroupId' | sed 's/"//g' > ./temp_files/ivs_sg.txt
     
-        echo -e "${GREEN}Checking ivs-sg security group...${NC}"
-        aws ec2 describe-security-groups | jq '.SecurityGroups[] | select(.GroupName=="ivs-sg")' | jq '.IpPermissions[] | select(.FromPort==80)' > /dev/null 2>&1 && ivs_http='OK' || ivs_http='NOK'
-        aws ec2 describe-security-groups | jq '.SecurityGroups[] | select(.GroupName=="ivs-sg")' | jq '.IpPermissions[] | select(.FromPort==443)' > /dev/null 2>&1 && ivs_https='OK' || ivs_https='NOK'
-        
-        if [ ivs_http = 'NOK' ]
-        then
-        
-            echo -e "${GREEN}Applying HTTP rule to ivs-sg security group...${NC}"
-            aws ec2 authorize-security-group-ingress --group-id $(cat ./temp_files/ivs_sg.txt) --protocol tcp --port 80 --cidr 0.0.0.0/0
-       
-        else
-    
-            echo -e "${GREEN}HTTP rule is OK...${NC}"
-        fi    
-       
-       if [ ivs_https = 'NOK' ]
-       then
-       
-            echo -e "${GREEN}Applying HTTPS rule to ivs-sg security group...${NC}"
-            aws ec2 authorize-security-group-ingress --group-id $(cat ./temp_files/ivs_sg.txt) --protocol tcp --port 433 --cidr 0.0.0.0/0
-            
-        else
-            
-            echo -e "${GREEN}HTTPS rule is OK...${NC}"
-        
-        fi
+        echo -e "${GREEN}Applying HTTP rule to ivs-sg security group...${NC}"
+        aws ec2 authorize-security-group-ingress --group-id $(cat ./temp_files/ivs_sg.txt) --protocol tcp --port 80 --cidr 0.0.0.0/0
+
+        echo -e "${GREEN}Applying HTTPS rule to ivs-sg security group...${NC}"
+        aws ec2 authorize-security-group-ingress --group-id $(cat ./temp_files/ivs_sg.txt) --protocol tcp --port 443 --cidr 0.0.0.0/0
 
     fi
 }
