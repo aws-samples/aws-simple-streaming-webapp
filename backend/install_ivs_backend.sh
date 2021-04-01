@@ -369,8 +369,21 @@ function codebuild_resources () {
         elif [ $build_status = 'COMPLETED' ]
         then
 
-            echo -e "${YELLOW}${build_status}${NC}"
-            break
+            phase_status=$(aws codebuild batch-get-builds --ids $ivs_build | jq '.builds[0].currentPhase' | sed 's/"//g')
+
+            if [ $phase_status = 'FAILED' ]
+            then
+
+                echo -e "${RED}${phase_status}!!!${NC}"
+                echo -e "${RED}Please, have a look at cloudwatch logs to understand why the codebuild failed, fix it and re-run the deployment.${NC}"
+                break
+
+            else
+
+                echo -e "${YELLOW}${build_status}${NC}"
+                echo -e "${GREEN}${phase_status}${NC}"
+                break
+            fi
 
         elif [ $build_status = 'FALIED' ]
         then
