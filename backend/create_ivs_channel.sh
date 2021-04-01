@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # This script creates the IVS Channel and prints the EndPoint + StreamKey to the user 
 
 # Define colors
