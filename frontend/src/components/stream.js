@@ -107,7 +107,7 @@ const testCert = (server1, server2) => {
 
   }
 
-  let protocol = window.location.protocol.replace('http', 'wss');
+  let protocol = window.location.protocol.replace('https', 'wss');
   let wsUrl = `${protocol}//${server1}/rtmps/${rtmpURL}${streamKey}`;
 
   console.log("LOOP check cert", server1, server2)
