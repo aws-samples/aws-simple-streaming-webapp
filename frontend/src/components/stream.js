@@ -293,7 +293,7 @@ const stopStreaming = () => {
 const fallbackServer = (err) => {
   console.log("got SERVERS!", wrapServers.secondaryServer);
   let serverSec = wrapServers.secondaryServer
-  let protocol = window.location.protocol.replace('http', 'wss'); // if tou are running in http, please change from https to http, to test transwrap_local change from wss to ws
+  let protocol = window.location.protocol.replace('https', 'wss'); // if tou are running in http, please change from https to http, to test transwrap_local change from wss to ws
   let testserver = "//127.0.0.1:3004" // if you need to perform test locally you can use the internal 
   let wsUrlFal = `${protocol}//${serverSec}/rtmps/${rtmpURL}${streamKey}`;
 
