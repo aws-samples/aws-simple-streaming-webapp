@@ -31,7 +31,7 @@ function App(props){
       }
   })();
     console.log('component mounted!')
-  },[]) //notice the empty array here
+  },[])
 
 
   const signOut = () => {
