@@ -58,3 +58,4 @@ yarn-error.log*
 
 #under dev
 /client*
+frontend/package-lock.json

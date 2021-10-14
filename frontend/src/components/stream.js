@@ -107,7 +107,12 @@ const testCert = (server1, server2) => {
 
   }
 
-  let protocol = window.location.protocol.replace('https', 'wss');
+  // if you are running in http, please change from https to http, to test transwrap_local change from wss to ws
+  if (window.location.protocol == 'http:'){
+    var protocol = window.location.protocol.replace('http', 'ws');
+  } else {
+    var protocol = window.location.protocol.replace('https', 'wss');
+  }   
   let wsUrl = `${protocol}//${server1}/rtmps/${rtmpURL}${streamKey}`;
 
   console.log("LOOP check cert", server1, server2)
@@ -293,7 +298,12 @@ const stopStreaming = () => {
 const fallbackServer = (err) => {
   console.log("got SERVERS!", wrapServers.secondaryServer);
   let serverSec = wrapServers.secondaryServer
-  let protocol = window.location.protocol.replace('https', 'wss'); // if tou are running in http, please change from https to http, to test transwrap_local change from wss to ws
+  // if you are running in http, please change from https to http, to test transwrap_local change from wss to ws
+  if (window.location.protocol == 'http:'){
+    var protocol = window.location.protocol.replace('http', 'ws');
+  } else {
+    var protocol = window.location.protocol.replace('https', 'wss');
+  } 
   let testserver = "//127.0.0.1:3004" // if you need to perform test locally you can use the internal 
   let wsUrlFal = `${protocol}//${serverSec}/rtmps/${rtmpURL}${streamKey}`;
 
@@ -341,7 +351,11 @@ const startStreaming = async (e) =>{
     e.preventDefault();
     console.log("got SERVERS!", wrapServers.primaryServer);
     let serverPri = wrapServers.primaryServer
-    let protocol = window.location.protocol.replace('https', 'wss');
+    if (window.location.protocol == 'http:'){
+      var protocol = window.location.protocol.replace('http', 'ws');
+    } else {
+      var protocol = window.location.protocol.replace('https', 'wss');
+    } 
     let localtest = '//127.0.0.1:3004'
     let wsUrl = `${protocol}//${serverPri}/rtmps/${rtmpURL}${streamKey}`;
 
