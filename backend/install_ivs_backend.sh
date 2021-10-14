@@ -142,23 +142,25 @@ function codebuild_adjust_templates () {
 
     # Capture the subnet that will be used by codebuild project
     replace_subnets=($(aws ec2 describe-subnets --filter Name=vpc-id,Values=$(aws ec2 describe-vpcs | jq '.Vpcs[] | select(.IsDefault)' | jq '.VpcId' | sed 's/"//g') --query 'Subnets[?MapPublicIpOnLaunch==`true`].SubnetId' | sed -e 's/\[//g;s/\]//g;s/ //g;s/"//g;s/,//g;1d;$ d' | sed -e :a -e ';$!N;s/\n/ /;ta')) > ./temp_files/codebuild_subnets.txt
-
+    sleep 2
+        
     ### BEGIN - EXEMPTION THIS SHOULD BE HERE
     # Test if exists
     aws iam get-role --role-name ivs-webrtc-codebuild-role > /dev/null 2>&1 && codebuild='OK' || codebuild='NOK'
-
+    sleep 2
+    
     if [ $codebuild = 'NOK' ]
     then
 
         # Create the AWS Codebuild role that will be used on our Codebuild Project
         echo -e "${GREEN}Creating AWS Codebuild role...${NC}"
         aws iam create-role --role-name ivs-webrtc-codebuild-role --assume-role-policy-document file://json_configs/ivs_webrtc_codebuild_trust_policy.json | jq '.Role.Arn' | sed 's/"//g' > ./temp_files/ivs_webrtc_codebuild_role_arn.txt
-    
+        sleep 2
     else
 
         # If Codebuild role exist already, save its Arn in ./temp_files/ivs_webrtc_codebuild_role_arn.txt
         aws iam get-role --role-name ivs-webrtc-codebuild-role | jq '.Role.Arn' | sed 's/"//g' > ./temp_files/ivs_webrtc_codebuild_role_arn.txt
-
+        sleep 2
     fi
     
 
@@ -196,19 +198,23 @@ function codebuild_iam () {
 
     # Test if exists
     codebuild=$(aws iam list-policies --scope Local | jq '.Policies[] | select(.PolicyName=="ivs_codebuild_ecr")' | jq '.Arn' | sed 's/"//g')
-
+    sleep 2
+    
     # If the policy do not exist, it should be created..Otherwise, it will just attach the policy
     if [ ! $codebuild ]
     then
         
         echo -e "${GREEN}Attaching ivs_codebuild_ecr policy to AWS Codebuild role...${NC}"
         aws iam create-policy --policy-name ivs_codebuild_ecr --policy-document file://json_configs/ivs_codebuild_ecr_policy.json | jq '.Policy.Arn' | sed 's/"//g' > ./temp_files/ivs_codebuild_ecr_arn.txt
+        sleep 2
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $(cat ./temp_files/ivs_codebuild_ecr_arn.txt)
+        sleep 2
         
     else
         
         echo -e "${GREEN}Attaching ivs_codebuild_ecr policy to AWS Codebuild role...${NC}"
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $codebuild
+        sleep 2
     
     fi
 
@@ -216,6 +222,7 @@ function codebuild_iam () {
 
     # Test if exists
     codebuild=$(aws iam list-policies --scope Local | jq '.Policies[] | select(.PolicyName=="ivs_codebuild_base")' | jq '.Arn' | sed 's/"//g')
+    sleep 2
 
     # If the policy do not exist, it should be created..Otherwise, it will just attach the policy
     if [ ! $codebuild ]
@@ -223,12 +230,15 @@ function codebuild_iam () {
         
         echo -e "${GREEN}Attaching ivs_codebuild_base policy to AWS Codebuild role...${NC}"
         aws iam create-policy --policy-name ivs_codebuild_base --policy-document file://json_configs/ivs_codebuild_base_policy.json | jq '.Policy.Arn' | sed 's/"//g' > ./temp_files/ivs_codebuild_base_arn.txt
+        sleep 2
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $(cat ./temp_files/ivs_codebuild_base_arn.txt)
+        sleep 2
         
     else
         
         echo -e "${GREEN}Attaching ivs_codebuild_base policy to AWS Codebuild role...${NC}"
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $codebuild
+        sleep 2
     
     fi
 
@@ -236,6 +246,7 @@ function codebuild_iam () {
 
     # Test if exists
     codebuild=$(aws iam list-policies --scope Local | jq '.Policies[] | select(.PolicyName=="ivs_codebuild_vpc")' | jq '.Arn' | sed 's/"//g')
+    sleep 2
 
     # If the policy do not exist, it should be created..Otherwise, it will just attach the policy
     if [ ! $codebuild ]
@@ -243,12 +254,15 @@ function codebuild_iam () {
         
         echo -e "${GREEN}Attaching ivs_codebuild_vpc policy to AWS Codebuild role...${NC}"
         aws iam create-policy --policy-name ivs_codebuild_vpc --policy-document file://json_configs/ivs_codebuild_vpc_policy.json | jq '.Policy.Arn' | sed 's/"//g' > ./temp_files/ivs_codebuild_vpc_arn.txt
+        sleep 2
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $(cat ./temp_files/ivs_codebuild_vpc_arn.txt)
+        sleep 2
         
     else
         
         echo -e "${GREEN}Attaching ivs_codebuild_vpc policy to AWS Codebuild role...${NC}"
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $codebuild
+        sleep 2
     
     fi
 
@@ -256,6 +270,7 @@ function codebuild_iam () {
 
     # Test if exists
     codebuild=$(aws iam list-policies --scope Local | jq '.Policies[] | select(.PolicyName=="ivs_codebuild_s3")' | jq '.Arn' | sed 's/"//g')
+    sleep 2
 
     # If the policy do not exist, it should be created..Otherwise, it will just attach the policy
     if [ ! $codebuild ]
@@ -263,12 +278,15 @@ function codebuild_iam () {
         
         echo -e "${GREEN}Attaching ivs_codebuild_s3 policy to AWS Codebuild role...${NC}"
         aws iam create-policy --policy-name ivs_codebuild_s3 --policy-document file://json_configs/ivs_codebuild_s3_policy.json | jq '.Policy.Arn' | sed 's/"//g' > ./temp_files/ivs_codebuild_s3_arn.txt
+        sleep 2
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $(cat ./temp_files/ivs_codebuild_s3_arn.txt)
+        sleep 2
         
     else
         
         echo -e "${GREEN}Attaching ivs_codebuild_s3 policy to AWS Codebuild role...${NC}"
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $codebuild
+        sleep 2
     
     fi
 
@@ -276,6 +294,7 @@ function codebuild_iam () {
 
     # Test if exists
     codebuild=$(aws iam list-policies --scope Local | jq '.Policies[] | select(.PolicyName=="ivs_codebuild_log")' | jq '.Arn' | sed 's/"//g')
+    sleep 2
 
     # If the policy do not exist, it should be created..Otherwise, it will just attach the policy
     if [ ! $codebuild ]
@@ -283,12 +302,15 @@ function codebuild_iam () {
         
         echo -e "${GREEN}Attaching ivs_codebuild_log policy to AWS Codebuild role...${NC}"
         aws iam create-policy --policy-name ivs_codebuild_log --policy-document file://json_configs/ivs_codebuild_log_policy.json | jq '.Policy.Arn' | sed 's/"//g' > ./temp_files/ivs_codebuild_log_arn.txt
+        sleep 2
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $(cat ./temp_files/ivs_codebuild_log_arn.txt)
+        sleep 2
         
     else
         
         echo -e "${GREEN}Attaching ivs_codebuild_log policy to AWS Codebuild role...${NC}"
         aws iam attach-role-policy --role-name ivs-webrtc-codebuild-role --policy-arn $codebuild
+        sleep 2
     
     fi
 
@@ -411,7 +433,8 @@ function iam_resources () {
     # This function will create all IAM resources required by ivs-webrtc
 
     # Test if exists
-    aws iam get-role --role-name ivs-ecs-execution-role > /dev/null 2>&1 && iam='OK' || iam='NOK' 
+    aws iam get-role --role-name ivs-ecs-execution-role > /dev/null 2>&1 && iam='OK' || iam='NOK'
+    sleep 2
     
     if [ $iam = 'NOK' ]
     then
@@ -420,10 +443,12 @@ function iam_resources () {
         echo -e "${GREEN}Creating Amazon ECS execution role...${NC}"
         aws iam create-role --role-name ivs-ecs-execution-role --assume-role-policy-document file://json_configs/ivs_ecs_trust_policy.json \
 | jq '.Role.Arn' | sed 's/"//g' > ./temp_files/ivs_ecs_execution_role_arn.txt
+        sleep 2
 
     else
     
         aws iam get-role --role-name ivs-ecs-execution-role | jq '.Role.Arn' | sed 's/"//g' > ./temp_files/ivs_ecs_execution_role_arn.txt
+        sleep 2
         
     fi
     
@@ -432,10 +457,13 @@ function iam_resources () {
     # Attach the required policies to Amazon ECS execution role you just created.
     echo -e "${GREEN}Attaching the required policies to Amazon ECS execution role...${NC}"
     aws iam attach-role-policy --role-name ivs-ecs-execution-role --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy 
+    sleep 2
     aws iam attach-role-policy --role-name ivs-ecs-execution-role --policy-arn arn:aws:iam::aws:policy/AWSOpsWorksCloudWatchLogs
+    sleep 2
 
     # Test if exists
     aws iam get-role --role-name ivs-lambda-role > /dev/null 2>&1 && iam='OK' || iam='NOK'
+    sleep 2
     
     if [ $iam = 'NOK' ]
     then
@@ -443,6 +471,7 @@ function iam_resources () {
         # Create the AWS Lambda execution role that will allow lambda to access the required AWS resources.
         echo -e "${GREEN}Creating the AWS Lambda execution role that will allow lambda to access the required AWS resources${NC}"
         aws iam create-role --role-name ivs-lambda-role --assume-role-policy-document file://json_configs/ivs_lambda_trust_policy.json > /dev/null
+        sleep 2
 
     fi
     
@@ -451,8 +480,10 @@ function iam_resources () {
     # Attach the required policies to AWS Lambda execution role you just created.
     echo -e "${GREEN}Attaching AWSLambdaBasicExecutionRole policy to AWS Lambda execution role...${NC}"
     aws iam attach-role-policy --role-name ivs-lambda-role --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    sleep 2
     echo -e "${GREEN}Attaching AmazonEC2ReadOnlyAccess policy to AWS Lambda execution role...${NC}"
-    aws iam attach-role-policy --role-name ivs-lambda-role --policy-arn arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess 
+    aws iam attach-role-policy --role-name ivs-lambda-role --policy-arn arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
+    sleep 2
     
     iam=$(aws iam list-policies --scope Local | jq '.Policies[] | select(.PolicyName=="ivs_dynamodb")' | jq '.Arn' | sed 's/"//g')
     
@@ -462,12 +493,15 @@ function iam_resources () {
         
         echo -e "${GREEN}Attaching ivs_dynamodb policy to AWS Lambda execution role...${NC}"
         aws iam create-policy --policy-name ivs_dynamodb --policy-document file://json_configs/ivs_lambda_dynamodb_policy.json | jq '.Policy.Arn' | sed 's/"//g' > ./temp_files/lambda_policy_arn.txt
+        sleep 2
         aws iam attach-role-policy --role-name ivs-lambda-role --policy-arn $(cat ./temp_files/lambda_policy_arn.txt)
+        sleep 2
         
     else
         
         echo -e "${GREEN}Attaching ivs_dynamodb policy to AWS Lambda execution role...${NC}"
         aws iam attach-role-policy --role-name ivs-lambda-role --policy-arn $(aws iam list-policies --scope Local | jq '.Policies[] | select(.PolicyName=="ivs_dynamodb")' | jq '.Arn' | sed 's/"//g')
+        sleep 2
     
     fi
         
@@ -486,6 +520,7 @@ function lambda_resources () {
     
     #Test if exists
     aws iam get-role --role-name ivs-lambda-role > /dev/null 2>&1 && lambda='OK' || lambda='NOK'
+    sleep 2
     
     if [ $lambda = 'OK' ]
     then
@@ -494,6 +529,7 @@ function lambda_resources () {
         echo -e "${GREEN}Creating the lambda.json with our lambda configuration...${NC}"
         lambda_role_arn=$(aws iam get-role --role-name ivs-lambda-role | jq '.Role.Arn' | sed 's/"//g')
         jq --arg v "$lambda_role_arn" '. |= . + {"Role":$v}' ./json_models/lambda_model.json > ./json_configs/lambda.json
+        sleep 2
 
     else
     
@@ -506,6 +542,7 @@ function lambda_resources () {
     
     #Test if exists
     aws lambda get-function --function-name ivs-ip-register > /dev/null 2>&1 && lambda='OK' || lambda='NOK'
+    sleep 2
     
     if [ $lambda = 'NOK' ]
     then
@@ -514,6 +551,7 @@ function lambda_resources () {
         echo -e "${GREEN}Creating the the ivs-ip-register lambda function...${NC}"
         zip lambda.zip lambda_function.py
         aws lambda create-function --cli-input-json file://json_configs/lambda.json --zip-file fileb://lambda.zip > /dev/null
+        sleep 2
     fi
 }
 
@@ -526,6 +564,7 @@ function dynamodb_resources () {
     # Ths function will create all dynamodb resources required by ivs-webrtc
 
     table=$(aws dynamodb list-tables | sed -n -e '/.*ivs/p' | sed -e 's/ //g;s/"//g;s/,//g')
+    sleep 2
     
     if [ ! -z $table ]
     then
@@ -533,17 +572,20 @@ function dynamodb_resources () {
         #Creates the Amazon DynamoDB ISS-task-dns-track-dev table
         echo -e "${GREEN}Creating the Amazon DynamoDB ISS-task-dns-track-dev table...${NC}"
         aws dynamodb create-table --cli-input-json file://json_configs/dynamodb_table.json > /dev/null
+        sleep 2
         aws dynamodb wait table-exists --table-name ISS-task-dns-track-dev
 
         #Populates the Amazon DynamoDB ISS-task-dns-track-dev table with the initial values
         echo -e "${GREEN}Populating the Amazon DynamoDB ISS-task-dns-track-dev table...${NC}"
         aws dynamodb batch-write-item --request-items file://json_configs/ivs_dynamodb_populate.json > /dev/null
+        sleep 2
     
     else
         
         #Populates the Amazon DynamoDB ISS-task-dns-track-dev table with the initial values
         echo -e "${GREEN}Populating the Amazon DynamoDB ISS-task-dns-track-dev table...${NC}"
         aws dynamodb batch-write-item --request-items file://json_configs/ivs_dynamodb_populate.json > /dev/null
+        sleep 2
     
     fi
 }
@@ -560,6 +602,7 @@ function vpc_resources () {
 
     # Test if exists
     aws ec2 create-security-group --group-name ivs-sg --description "IVS WetRTC Security Group" --vpc-id $(aws ec2 describe-vpcs | jq '.Vpcs[] | select(.IsDefault)' | jq '.VpcId' | sed 's/"//g') > /dev/null 2>&1 && sg='OK' || sg='NOK'
+    sleep 2
 
     if [ sg = 'NOK' ]
     then
@@ -567,7 +610,9 @@ function vpc_resources () {
         #The Security Group'
         echo -e "${GREEN}Creating the ivs-sg security group...${NC}"
         aws ec2 create-security-group --group-name ivs-sg --description "IVS WetRTC Security Group" --vpc-id $(aws ec2 describe-vpcs | jq '.Vpcs[] | select(.IsDefault)' | jq '.VpcId' | sed 's/"//g') | jq '.GroupId' | sed 's/"//g'
+        sleep 2
         aws ec2 describe-security-groups | jq '.SecurityGroups[] | select(.GroupName=="ivs-sg")' | jq '.GroupId' | sed 's/"//g' > ./temp_files/ivs_sg.txt
+        sleep 2
 
         echo -e "${GREEN}Configuring ivs-sg security group...${NC}"
         while read line; do aws ec2 authorize-security-group-ingress --group-id $(cat ./temp_files/ivs_sg.txt) --protocol tcp --port $line --cidr 0.0.0.0/0; done < ./json_models/ivs_ports.txt
@@ -575,12 +620,15 @@ function vpc_resources () {
     else
     
         aws ec2 describe-security-groups | jq '.SecurityGroups[] | select(.GroupName=="ivs-sg")' | jq '.GroupId' | sed 's/"//g' > ./temp_files/ivs_sg.txt
+        sleep 2
     
         echo -e "${GREEN}Applying HTTP rule to ivs-sg security group...${NC}"
         aws ec2 authorize-security-group-ingress --group-id $(cat ./temp_files/ivs_sg.txt) --protocol tcp --port 80 --cidr 0.0.0.0/0
+        sleep 2
 
         echo -e "${GREEN}Applying HTTPS rule to ivs-sg security group...${NC}"
         aws ec2 authorize-security-group-ingress --group-id $(cat ./temp_files/ivs_sg.txt) --protocol tcp --port 443 --cidr 0.0.0.0/0
+        sleep 2
 
     fi
 }
@@ -598,6 +646,7 @@ function fargate_resources () {
     #Creates the Amazon ECS Cluster named ivs
     echo -e "${GREEN}Creating the Amazon ECS Cluster named ivs...${NC}"
     aws ecs create-cluster --cluster-name ivs | jq '.cluster.clusterArn' | sed 's/"//g' > ./temp_files/ecs_cluster_arn.txt
+    sleep 2
 
     #Configures the ivs_task_definition.json file with the correct Amazon ECS execution previously created
     echo -e "${GREEN}Configuring the ivs_task_definition.json file with the correct Amazon ECS execution...${NC}"
@@ -608,13 +657,16 @@ function fargate_resources () {
     #Creates Amazon ECS Task Definition named ivs-webrtc
     echo -e "${GREEN}Creating the Amazon ECS Task Definition named ivs-webrtc...${NC}"
     aws ecs register-task-definition --cli-input-json file://json_configs/ivs_task_definition.json > /dev/null
+    sleep 2
 
     #Select the proper subnets from your default vpc to be used by Amazon ECS Service
     echo -e "${GREEN}Selecting the proper subnets from your default vpc to be used by Amazon ECS Service...${NC}"
     aws ec2 describe-subnets --filter Name=vpc-id,Values=$(aws ec2 describe-vpcs | jq '.Vpcs[] | select(.IsDefault)' | jq '.VpcId' | sed 's/"//g') \
 --query 'Subnets[?MapPublicIpOnLaunch==`true`].SubnetId' | sed -e '/^$/d;:a;N;$!ba;s/\n//g;s/ //g;s/[][]//g;s/.$//;s/^.//' > ./temp_files/my_subnets.txt
-
+    sleep 2
+    
     ivs_service=$(aws ecs list-services --cluster ivs | sed -n -e '/.*ivs/p' | sed -e 's/ //g;s/"//g;s/,//g')
+    sleep 2
     
     if [ ! $ivs_service ]
     then
@@ -630,6 +682,7 @@ function fargate_resources () {
         #Creates the Amazon ECS service named ivs-webrtc
         echo -e "${GREEN}Creating the Amazon ECS service named ivs-webrtc...${NC}"
         aws ecs create-service --cli-input-json file://json_configs/ivs_ecs_service.json > /dev/null
+        sleep 2
     
     else
     
@@ -650,6 +703,7 @@ function eventbridge_resources () {
     
     # Test if exists
     aws lambda get-function --function-name ivs-ip-register > /dev/null 2>&1 && lambda='OK' || lambda='NOK'
+    sleep 2
 
     #Configures the ivs_events_rule.json with the correct ivs service configured in Amazon ECS Cluster
     echo -e "${GREEN}Configuring the ivs_events_rule.json with the correct ivs service configured in Amazon ECS Cluster...${NC}"
@@ -659,6 +713,7 @@ function eventbridge_resources () {
     #Create the Amazon EventBridge rule named ip-register
     echo -e "${GREEN}Creating the Amazon EventBridge rule named ip-register...${NC}"
     aws events put-rule --cli-input-json file://json_configs/ivs_events_rule.json | jq '.RuleArn' | sed 's/"//g' > ./temp_files/ivs_event_rule_arn.txt
+    sleep 2
 
     if [ $lambda = 'OK' ]
     then
@@ -668,12 +723,14 @@ function eventbridge_resources () {
         #Creating the resource policy template
         echo -e "${GREEN}Creating the resource policy template...${NC}"
         aws lambda get-function --function-name ivs-ip-register | jq '.Configuration.FunctionArn' | sed 's/"//g' > ./temp_files/ivs_lambda_function_arn.txt
+        sleep 2
         
         
         
         #Adding permission to ip-register rule invoke lambda funtion ivs-ip-register
         echo -e "${GREEN}Adding permission to ip-register rule invoke lambda funtion ivs-ip-register...${NC}"
         aws lambda add-permission --function-name ivs-ip-register --action lambda:InvokeFunction --statement-id events --principal events.amazonaws.com --source-arn=$(cat ./temp_files/ivs_event_rule_arn.txt) > /dev/null 2>&1 && lambda='OK' || lambda='NOK'
+        sleep 2
         
         if [ $lambda = 'NOK' ]
         then
@@ -684,7 +741,9 @@ function eventbridge_resources () {
         #Add lambda function ivs-ip-register as a target to the event rule ip-register
         echo -e "${GREEN}Adding lambda function ivs-ip-register as a target to the event rule ip-register...${NC}"
         aws events remove-targets --rule ip-register --ids "1" > /dev/null
+        sleep 2
         aws events put-targets --rule ip-register --targets "Id"="1","Arn"="$(cat ./temp_files/ivs_lambda_function_arn.txt)" > /dev/null
+        sleep 2
 
     else
     
@@ -707,6 +766,7 @@ function cloudwatchlogs_resources () {
     #Creating cloudwatch log group name for ivs-webrtc tasks
     echo -e "${GREEN}Creating cloudwatch log group name for ivs-webrtc tasks...${NC}"
     aws logs create-log-group --log-group-name /ecs/ivs-webrtc > /dev/null 2>&1 && logs='OK' || logs='NOK'
+    sleep 2
     
     if [ $logs = 'NOK' ]
     then
@@ -725,6 +785,7 @@ function fargate_adjust_service () {
     # This function will adjust the fargate service ivs-webrtc from 0 to 2 tasks
     echo -e "${GREEN}Adjusting fargate service to 2 tasks...${NC}"
     aws ecs update-service --cluster ivs --service ivs-webrtc --desired-count 2 > /dev/null
+    sleep 2
 
     
 
