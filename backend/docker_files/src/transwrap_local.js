@@ -9,7 +9,7 @@ const callff = require('child_process');
 
 /// app socket definition
 const app = express();
-const port = 3004
+const port = 80
 const servertype = 'HTTP'
 const home = '/wwww' /// for heath check only, you can also use as standalone server, by moving the frontend folder to the home www
 

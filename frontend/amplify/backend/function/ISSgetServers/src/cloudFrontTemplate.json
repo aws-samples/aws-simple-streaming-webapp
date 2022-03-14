@@ -75,9 +75,22 @@
             "FunctionAssociations": {
                 "Quantity": 0
             },
+            "MinTTL": 60,
+            "DefaultTTL": 86400,
+            "MaxTTL": 31536000,
             "FieldLevelEncryptionId": "",
-            "CachePolicyId": "8621f340-e109-41c8-84d9-7e3dc397ddb0",
-            "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3"
+            "ForwardedValues": {
+                "QueryString": false,
+                "Cookies": {
+                    "Forward": "none"
+                },
+                "Headers": {
+                    "Quantity": 0
+                },
+                "QueryStringCacheKeys": {
+                    "Quantity": 0
+                }
+            }
         },
         "CacheBehaviors": {
             "Quantity": 0
@@ -85,7 +98,7 @@
         "CustomErrorResponses": {
             "Quantity": 0
         },
-        "Comment": "forSocket_test",
+        "Comment": "ISS-for-IVS-Socket",
         "Logging": {
             "Enabled": false,
             "IncludeCookies": false,

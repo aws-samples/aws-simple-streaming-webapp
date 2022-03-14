@@ -24,8 +24,8 @@ RUN apt-get update \
 	&& openssl x509 -req -days 9999 -in /opt/ivs-simple-webrtc/csr.pem -signkey /opt/ivs-simple-webrtc/key.pem -out /opt/ivs-simple-webrtc/cert.pem \
 	&& rm /opt/ivs-simple-webrtc/csr.pem
 
-# Expose port 443
-EXPOSE 443
+# Expose port 80
+EXPOSE 80
 
 # Copy transwraper.js to /opt/ivs-simple-webrtc folder
 COPY src* /opt/ivs-simple-webrtc/
@@ -34,4 +34,4 @@ COPY src* /opt/ivs-simple-webrtc/
 COPY health* /opt/ivs-simple-webrtc/www/
 
 # Start webserver
-CMD ["pm2-runtime","/opt/ivs-simple-webrtc/transwrap.js","-i max"]
+CMD ["pm2-runtime","/opt/ivs-simple-webrtc/transwrap_local.js","-i max"]

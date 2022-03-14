@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "paths": {
+    "/putitens": {
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "create",
+          "read",
+          "update",
+          "delete"
+        ]
+      },
+      "lambdaFunction": "saveIVSparam"
+    },
+    "/getServers": {
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "create",
+          "read",
+          "update"
+        ]
+      },
+      "lambdaFunction": "ISSgetServers"
+    }
+  }
+}

@@ -60,3 +60,4 @@ yarn-error.log*
 /client*
 frontend/package-lock.json
 backend/package-lock.json
+frontend/stats.json

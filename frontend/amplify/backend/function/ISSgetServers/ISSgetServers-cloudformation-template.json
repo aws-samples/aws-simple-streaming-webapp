@@ -196,6 +196,14 @@
                   ]
                 }
               ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "cloudfront:CreateDistributionWithTags",
+                "cloudfront:CreateDistribution"
+              ],
+              "Resource": "*"
             }
           ]
         }
