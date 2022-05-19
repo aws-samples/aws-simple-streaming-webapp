@@ -22,20 +22,22 @@ export default function HomePage(props) {
 
   useEffect(() => {
     (async function () {
-      let apiName = "saveIVSparam";
-      let path = `/getServers/`;
-      await API.get(apiName, path)
-        .then((response) => {
-          if (response.Items.length === 0) {
-            console.err("Server is not defined");
-          } else {
-            console.log("SERFERR", response.Items[0].dns);
-            setWrapServers(response.Items[0].dns);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      if (!wrapServers) {
+        let apiName = "saveIVSparam";
+        let path = `/getServers/`;
+        await API.get(apiName, path)
+          .then((response) => {
+            if (response.Items.length === 0) {
+              console.err("Server is not defined");
+            } else {
+              console.log("Remote server is:", response.Items[0].dns);
+              setWrapServers(response.Items[0].dns);
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      } else console.log("Remote server is, cached:", wrapServers);
     })();
   }, [streaming]);
 
@@ -55,7 +57,7 @@ export default function HomePage(props) {
     audioRef.current = audio;
   }
 
-  const startStream = async (e) => {
+  async function startStream(e) {
     e.preventDefault();
     if (!wsRef.current)
       await socketConnect(wrapServers, streamParams.url, streamParams.key);
@@ -87,7 +89,7 @@ export default function HomePage(props) {
       wsRef.current.send(e.data);
     });
     mediaRecorder.current.start(1000);
-  };
+  }
 
   function stopStreaming(e) {
     mediaRecorder.current.stop();
@@ -95,15 +97,15 @@ export default function HomePage(props) {
   }
 
   async function socketConnect(server, rtmpURL, streamKey) {
-    let testServer = "127.0.0.1:3004";
     console.log("socketConnect");
     if (window.location.protocol == "http:") {
-      var protocol = window.location.protocol.replace("http", "ws");
+      let protocol = window.location.protocol.replace("http", "ws");
+      let testServer = "127.0.0.1:3004";
+      var wsUrl = `${protocol}//${testServer}/rtmps/${rtmpURL}${streamKey}`; // if you want to stream to a remote server, change here to server instead of test server
     } else {
-      var protocol = window.location.protocol.replace("https", "wss");
+      let protocol = window.location.protocol.replace("https", "wss");
+      var wsUrl = `${protocol}//${server}/rtmps/${rtmpURL}${streamKey}`;
     }
-
-    let wsUrl = `${protocol}//${testServer}/rtmps/${rtmpURL}${streamKey}`;
     console.log("URL", wsUrl);
     wsRef.current = new WebSocket(wsUrl);
 
@@ -115,7 +117,7 @@ export default function HomePage(props) {
     };
     // onclose sub-function, please note::, Fargate container takes a few minutes to start at the deployment
     wsRef.current.onclose = (e) => {
-      console.log("It's Closed", server, e.code, e);
+      console.log("Socket Closed", server, e.code, e);
       if (e.code == 1006) {
         console.log("timeout");
         wsRef.current = null;

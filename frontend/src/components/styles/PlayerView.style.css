@@ -18,7 +18,6 @@
 
   .video-js{
     position: relative;
-    background-color: rgb(255, 0, 208);
     width: 100%;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30);
   }
