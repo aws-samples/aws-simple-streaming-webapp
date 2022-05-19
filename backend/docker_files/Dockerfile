@@ -26,6 +26,7 @@ RUN apt-get update \
 
 # Expose port 80
 EXPOSE 80
+EXPOSE 443
 
 # Copy transwraper.js to /opt/ivs-simple-webrtc folder
 COPY src* /opt/ivs-simple-webrtc/
@@ -34,4 +35,4 @@ COPY src* /opt/ivs-simple-webrtc/
 COPY health* /opt/ivs-simple-webrtc/www/
 
 # Start webserver
-CMD ["pm2-runtime","/opt/ivs-simple-webrtc/transwrap_local.js","-i max"]
+CMD ["pm2-runtime","/opt/ivs-simple-webrtc/transwrap.js","-i max"]

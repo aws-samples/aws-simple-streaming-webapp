@@ -9,7 +9,7 @@ NC='\033[0m'
 # Var Definitons
 
 DyTable='ISS-task-dns-track-dev'
-AwsAccProfile='poc-account'
+AwsAccProfile='default'
 Region='us-east-1'
 
 # Scan the Dynamo Table

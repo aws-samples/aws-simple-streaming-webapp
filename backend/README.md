@@ -1,47 +1,38 @@
-## Transwrap container server instructions
+# Simplifying live streaming contribution - running in Amazon ECS Container
 
-The backend transwrap server (transwrap.js) is a simple socket server that receives a socket connection data in webm and transwrap / proxies the content to RTMP.
+## Deploy the backend environment
 
-### General Instructions
+The proxy transwapper is a compound of two containers running a NodeJS web server and FFmpeg. The containers are running on AWS Fargate for Amazon ECS. The AWS Fargate is a serverless compute engine for containers that work with Amazon Elastic Container Service (ECS) and Amazon Elastic Kubernetes Service (EKS). 
+ 
+In Amazon ECS, you have three building blocks to run your containers successfully:
+ 
+Task definition: It is like a blueprint for your application. It is where you which docker images to use and the resources that your container will require.
+ 
+Task: It is the instantiation of your task definition.
+ 
+Service: It launches and maintains a specified number of copies of the task definition in your cluster.
+ 
+In our case, we have a service with two tasks, and each has its own public IP to receive the video stream via WebSocket.
+ 
+To track each task's public IP, we are using Amazon EventBridge, AWS Lambda, and Amazon DynamoDB.
+ 
+Amazon EventBridge: This is a serverless event bus that makes it easier to build event-driven applications at scale using events generated from your applications, integrated Software-as-a-Service (SaaS) applications, and AWS services. In this case, we built a rule in Amazon EventBridge to track our tasks' start and stop status and trigger the AWS Lambda function.
+ 
+AWS Lambda: This is a serverless compute service that lets you run code without provisioning or managing servers, creating workload-aware cluster scaling logic, maintaining event integrations, or managing runtimes. In this case, we built an AWS Lambda Function that, when triggered by the Amazon EventBridge, will update the public IP of the tasks in an Amazon DynamoDB table.
+ 
+Amazon DynamoDB: This is a key-value and document database that delivers single-digit millisecond performance at any scale. It's a fully managed, multi-region, multi-active, durable database with built-in security, backup and restores, and in-memory caching for internet-scale applications. In this case, we use an Amazon DynamoDB table to stores the metadata of the tasks. The Public IP of the tasks is part of the metadata.
+ 
+The backend deployment is built using a bash shell script located under aws-simple-streaming-webapp/backend that runs AWS CLI commands to build the environment.
 
-#### 1) Running in a local envirolment: localhost
-
-First install the dependencies and then use the file transwrap_local.js with node.
-```
-    npm install
-    npm start-test transwrap_local.js
-```
-
-it should give the following result
-
-Listening on port: 3004
-
-#### 2) Running in production
-
-The application frontent requires https, and the transwrap.js is built-in https Node.js module.
-For running your server, first we need to create or install a SSL certificate.
-
-The following instructions will generate the key.pem and cert.pem self-sigend certificates for our server.
-Note: Self-signed certificates are not recomended for a non-development evirolment. You can user AWS Certificate Manager (link) to provision, manage, and deploy public and private SSL/TLS 
-
-#### Generating certificate for develoment tests locally in HTTPS
-
-```
-    openssl genrsa -out key.pem
-    openssl req -new -key key.pem -out csr.pem
-    openssl x509 -req -days 9999 -in csr.pem -signkey key.pem -out cert.pem
-    rm csr.pem
+```sh
+    cd simple-streaming-webapp/backend
+    ./install_ivs_backend.sh (https://github.com/osmarbento-AWS/simple-streaming-webapp/blob/withHooks/backend/install_ivs_backend.sh) deploy all
 ```
 
-Running locally in HTTPS
+## HTTPS considerations
+The remote ECS container uses a self signed certificate, so you might have to allow your browser to accept the self signed certificate, or add an Amazon CloudFront distribution to handle HTTPS, or add your own valid certificate to the container.  
 
-```
-    npm install
-    npm start transwrap.js
-```
+## Cleanup - (Optional): Cleanup, removing the provisioned AWS resources. 
 
-The certificates has to be generated in the backend folder.
+For removing the Transwrap proxy server, you can use the bash script uninstall_ivs_backend.
 
--------
-Note: This project uses FFMPEG please check lisencing aspects.  
-FFmpeg is licensed under the GNU Lesser General Public License (LGPL) version 2.1 or later. However, FFmpeg incorporates several optional parts and optimizations that are covered by the GNU General Public License (GPL) version 2 or later. If those parts get used the GPL applies to all of FFmpeg.
