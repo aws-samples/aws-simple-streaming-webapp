@@ -1,0 +1,13 @@
+body {
+  text-align: center;
+  color: white;
+}
+
+body nav a {
+  font-size: large;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+
+

@@ -3,14 +3,16 @@
 
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import Stream from "./Stream";
-import Home from "./Home";
+import UserMedia from "./UserMedia";
+import HomePage from "./HomePage";
+import PlayerView from "./PlayerView";
+import "./App.css";
 
 import Amplify from "@aws-amplify/core";
 import Auth from "@aws-amplify/auth";
 import { withAuthenticator } from "@aws-amplify/ui-react";
-import "@aws-amplify/ui-react/styles.css";
 import awsmobile from "../aws-exports";
+import "@aws-amplify/ui-react/styles.css";
 
 Amplify.configure(awsmobile);
 Auth.configure(awsmobile);
@@ -38,36 +40,40 @@ function App(props) {
     Auth.signOut();
   };
 
+  const openModal = () => {
+    console.log("Ok!Here");
+  };
+
   return username ? (
     <Router>
       <div>
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-          <ul className="navbar-nav mr-auto">
-            <a className="navbar-brand" href="/"></a>
-            <li>
-              <Link to={"/"} className="nav-link">
-                Home
-              </Link>
-            </li>
-          </ul>
-          <ul id="nav-mobile" className="right navbar-nav">
-            <li className="float-right">
-              <a className="nav-link float-right" href="/" onClick={signOut}>
-                Logout
-              </a>
-            </li>
-          </ul>
+        <nav className="navbar navbar-dark bg-dark">
+          <a href="/">Simple Streaming</a>
+          <button id="openplayer" className="btn btn-outline-info">
+            Open Player
+          </button>
+          <button className="btn btn-outline-danger" onClick={signOut}>
+            Logout
+          </button>
         </nav>
-        <hr />
         <Routes>
-          <Route index element={<Home username={username} {...props} />} />
+          <Route index element={<HomePage username={username} {...props} />} />
           <Route
             exact
-            path="/Stream"
-            element={<Stream username={username} {...props} />}
+            path="/UserMedia"
+            element={<UserMedia username={username} {...props} />}
+          />
+          <Route
+            exact
+            path="/HomePage"
+            element={<HomePage username={username} {...props} />}
+          />
+          <Route
+            exact
+            path="/PlayerView"
+            element={<PlayerView username={username} {...props} />}
           />
         </Routes>
-        <div></div>
       </div>
     </Router>
   ) : (

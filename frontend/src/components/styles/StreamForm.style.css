@@ -1,0 +1,64 @@
+body {
+    color: #484F56; 
+}
+
+.textFormivs {
+    position: relative;
+    display: flex;
+    margin: auto;
+    max-width: 1000px;
+    flex-direction: column;
+  }
+  .textFormivs .form-ivs {
+    padding-top: 20px;
+    margin: auto;
+  }
+
+  .textFormivs .form-URL {
+    position: relative;
+    width: auto;
+    display: flex;
+    color: #484F56; 
+    box-sizing: border-box;
+  }
+  .textFormivs .formLabel {
+    position: relative;
+    text-align: center;
+    color: #484F56; 
+    font-size: 0.8rem;;
+  }
+  .textFormivs .formURL {
+    position: relative;
+    display: flex;
+    color: #484F56;
+    width: auto;
+    height: 38px;
+    border-color: #F0F0F0;
+    border-radius: 6px;
+    padding-left: 1px ;
+    font-size: 0.8rem;
+  }
+  
+  .textFormivs .formSelect {
+    display: flex;
+    color: #484F56;
+    width: auto;
+    height: 38px;
+    border-color: #F0F0F0;
+    border-radius: 6px;
+    font-size: 0.8rem;
+  }
+  
+  .textFormivs .formBot {
+    position: relative;
+    display: flex;
+    background-color: #9146FF;
+    top: 16px;
+    border: none;
+    color: white;
+    display: inline-block;
+    font-size: 12px;
+    height: 40px;
+    border-radius: 8px;
+    margin-left: 20px;
+  }

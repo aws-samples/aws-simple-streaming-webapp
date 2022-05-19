@@ -1,0 +1,88 @@
+.PlayerView {
+    text-align: center;
+  }
+
+  .PlayerView h1 {
+    color: black;
+  }
+
+  .videoborder{
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    background-color: aqua;
+    align-items: center;
+    border-radius: 10px;
+  }
+
+  .video-js{
+    position: relative;
+    background-color: rgb(255, 0, 208);
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30);
+  }
+  
+  .PlayerView .videoplayer {
+    position: relative;
+    margin: auto;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    top: 0;
+    left: 0;
+    z-index: 100;
+  }
+
+  .PlayerView .debug-container {
+    padding-top: 10px;
+    position: relative;
+    max-width: 1000px;
+    padding-bottom: 20px;
+    margin: auto;
+  }
+
+.PlayerView .debug-data {
+    width: 80%;
+    height: 150px;
+    margin: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30);
+    justify-content: center;
+    flex-direction: column;
+    border: 0rem;
+    color: #4a4a4a;
+    font-family: monospace;
+    background: #fff;
+    border-radius: 0 0 6px 6px;
+    display: flex;
+    flex-shrink: 0;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    flex-direction: column;
+  }
+  
+  .PlayerView .data-line {
+    display: flex;
+    flex-shrink: 0;
+    margin: 0 5px 0 0;
+    padding: 3px 5px 5px 10px;
+    word-break: break-all;
+    transition: all 0.15s ease-in-out;
+    animation: fadeIn 0.25s 1;
+  }
+  
+  .PlayerView .data-line:last-child {
+    padding-bottom: 2px;
+  }
+  
+  .PlayerView .debug-data__time {
+    min-width: 5rem;
+    font-weight: 300;
+    font-size: 12px;
+    padding-right: 5px;
+  }
+  
+  .PlayerView .debug-data__value {
+    font-weight: bold;
+    font-size: 12px;
+  }
