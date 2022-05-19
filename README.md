@@ -19,12 +19,12 @@ This is a serverless application, leveraging [Amazon IVS](https://aws.amazon.com
 
 
 ## Deployment options:
-*NOTE:* Deploying this demo application in your AWS account will create and consume AWS resources. 
+:warning: **NOTE:** Deploying this demo application in your AWS account will create and consume AWS resources. 
 
-### [1. To deploy the application API's and run the client app locally:](/frontend/README.md)
+### :video_camera: [1. To deploy the application API's and run the client app locally](/frontend/README.md)
 We will need to deploy the API's, Lambda Functions and Authentication resources, we will use AWS Amplify.
 
-### [2. Deployment of the Proxy AWS Fargate and web App Publish](/backend/README.md)
+### :rocket: [2. Deployment of the Proxy AWS Fargate and web App Publish](/backend/README.md)
 This is an optional step to provisione a ECS Docker Container to work a remote transwrap proxy, that will translate from WebRTC to RTMPS.
 
 ## Simplifying live streaming contribution - run locally.
@@ -37,7 +37,7 @@ The server - transwrap-http.js can be local or remote, according to the steps th
 For improving browser compatibility, the video element was embedded in a canvas element, as HTMLMediaElement.captureStream() has limited support. HTMLCanvasElement.captureStream() compatibility can be observed in the link [captureStream()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/captureStream)
 
 ## Next step
-[Deploy the application API's and run the client app locally:](/frontend/README.md)
+[Deploy the application API's and run the client app locally](/frontend/README.md)
 
 ## Additional guides in this repository
 * [*Backend: Transwraping Amazon ECS container:*](/backend/README.md)Install  the remote video transwrap server.

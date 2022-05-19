@@ -30,7 +30,16 @@ The backend deployment is built using a bash shell script located under aws-simp
 ```
 
 ## HTTPS considerations
-The remote ECS container uses a self signed certificate, so you might have to allow your browser to accept the self signed certificate, or add an Amazon CloudFront distribution to handle HTTPS, or add your own valid certificate to the container.  
+The remote ECS container uses a self signed certificate, so you might have to allow your browser to accept the self signed certificate, or add an Amazon CloudFront distribution to handle HTTPS, or add your own valid certificate to the container. 
+
+To discover the external IP address of your transwrap server you can run:
+
+```sh
+./get_container_domain.sh
+```
+
+:warning: **Note:** For test purpose only.
+Open it on your web browser add https:// in front of your domain and accept the self signed certificate.
 
 ## Cleanup - (Optional): Cleanup, removing the provisioned AWS resources. 
 
