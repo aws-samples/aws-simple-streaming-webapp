@@ -41,6 +41,8 @@ Running locally in HTTPS
 
 The certificates has to be generated in the backend folder.
 
+## [Return to the frontend deployment](../frontend/README.md)
+
 -------
 Note: This project uses FFMPEG please check lisencing aspects.  
 FFmpeg is licensed under the GNU Lesser General Public License (LGPL) version 2.1 or later. However, FFmpeg incorporates several optional parts and optimizations that are covered by the GNU General Public License (GPL) version 2 or later. If those parts get used the GPL applies to all of FFmpeg.
