@@ -11,39 +11,39 @@ export default function StreamForm(props) {
   const [channelType, setChannelType] = useState("");
   const [streamKey, setStreamKey] = useState("");
   const [playURL, setPlayURL] = useState("");
-  const [configured, isConfigured] = useState(null);
+  const [configured, isConfigure] = useState(null);
   const { onReady } = props;
 
   useEffect(() => {
     (async function () {
-      let apiName = "saveIVSparam";
-      let path = `/putitens/${username}`;
-      await API.get(apiName, path)
-        .then((ivsparams) => {
-          if (ivsparams) {
-            isConfigured(true);
-            setChannelType(ivsparams.channelType.S);
-            setRtmpURL(ivsparams.rtmpURL.S);
-            setStreamKey(ivsparams.streamKey.S);
-            setPlayURL(ivsparams.playURL.S);
-            onReady &&
-              onReady(
-                ivsparams.rtmpURL.S,
-                ivsparams.streamKey.S,
-                ivsparams.playURL.S,
-                configured
-              );
-          } else {
-            isConfigured(false);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      await getStream();
     })();
-  }, []);
+  }, [configured]);
 
-  async function getStream() {}
+  async function getStream() {
+    let apiName = "saveIVSparam";
+    let path = `/putitens/${username}`;
+    await API.get(apiName, path)
+      .then((ivsparams) => {
+        if (ivsparams) {
+          setChannelType(ivsparams.channelType.S);
+          setRtmpURL(ivsparams.rtmpURL.S);
+          setStreamKey(ivsparams.streamKey.S);
+          setPlayURL(ivsparams.playURL.S);
+          isConfigure(true);
+          onReady &&
+            onReady(
+              ivsparams.rtmpURL.S,
+              ivsparams.streamKey.S,
+              ivsparams.playURL.S,
+              configured
+            );
+        } else isConfigure(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 
   const storeStream = (e) => {
     e.preventDefault();
@@ -60,7 +60,6 @@ export default function StreamForm(props) {
     };
     API.post(apiName, path, data)
       .then((response) => {
-        isSaved(true);
         getStream();
       })
       .catch((error) => {
@@ -137,7 +136,12 @@ export default function StreamForm(props) {
               </label>
             </div>
             <div className="formLabel">
-              <button type="submit" className="formBot" onClick={storeStream}>
+              <button
+                id="btnsave"
+                type="submit"
+                className="formBot"
+                onClick={storeStream}
+              >
                 Save
               </button>
             </div>

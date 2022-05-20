@@ -15,7 +15,7 @@ export default function HomePage(props) {
   const audioRef = useRef();
   const [streamParams, setStreamParams] = useState({ url: "", key: "" });
   const [streaming, setStreaming] = useState(false);
-
+  const [configured, setConfigured] = useState(false);
   const [wrapServers, setWrapServers] = useState("");
   const wsRef = useRef();
   const btnPlayer = document.querySelector("#openplayer");
@@ -40,7 +40,7 @@ export default function HomePage(props) {
         }
       } else console.log("Remote server is, cached:", wrapServers);
     })();
-  }, [streaming]);
+  }, [streaming, configured]);
 
   function handleError(e) {
     console.log("The server request returned null", e);
@@ -52,6 +52,13 @@ export default function HomePage(props) {
   function handleFormReady(url, key, playurl) {
     setStreamParams({ url: url, key: key });
     btnPlayer.addEventListener("click", () => openPlayer(playurl));
+    const btnSave = document.querySelector("#btnsave");
+    btnSave.addEventListener("click", (e) => {
+      e.preventDefault;
+      btnSave.classList.add("saved");
+      setConfigured(true);
+      addDebugLine(Date.now(), `Stream Params Saved, ready to stream`);
+    });
   }
 
   function openPlayer(url) {
@@ -89,10 +96,9 @@ export default function HomePage(props) {
       mimeType: "video/webm;codecs=h264", // attempt to improve cross browser / platform support with h264
       videoBitsPerSecond: 3000000,
     });
-    console.log("MR", mediaRecorder);
 
     mediaRecorder.current.addEventListener("dataavailable", (e) => {
-      console.log("data!!!", e);
+      console.log("Stream data!!!", e);
       wsRef.current.send(e.data);
     });
     mediaRecorder.current.start(1000);
