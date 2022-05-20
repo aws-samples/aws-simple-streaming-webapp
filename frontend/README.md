@@ -86,6 +86,6 @@ amplify delete
 ```
 
 ## Choose your next adventure:
-* [*Backend: Transwraping Amazon ECS container:*](/backend/README.md)Install  the remote video transwrap server.
-* [*Create a IVS Channel using a shell script*](/backend/CREATEIVS.md)
-* [*Customize the web app and compatibility discussions*](frontend/BROWSER.md)
+* [**Backend: Transwraping Amazon ECS container:**](/backend/README.md)Install  the remote video transwrap server.
+* [**Create a IVS Channel using a shell script**](/backend/CREATEIVS.md)
+* [**Customize the web app and compatibility discussions**](BROWSER.md)
