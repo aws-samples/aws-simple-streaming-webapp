@@ -8,6 +8,7 @@ The backend transwrap server (transwrap.js) is a simple socket server that recei
 
 First install the dependencies and then use the file transwrap_local.js with node.
 ```
+    cd backend/
     npm install
     npm start-test transwrap_local.js
 ```
@@ -27,19 +28,25 @@ Note: Self-signed certificates are not recomended for a non-development evirolme
 #### Generating certificate for develoment tests locally in HTTPS
 
 ```
-    openssl genrsa -out key.pem
-    openssl req -new -key key.pem -out csr.pem
-    openssl x509 -req -days 9999 -in csr.pem -signkey key.pem -out cert.pem
-    rm csr.pem
+cd backend/
+openssl genrsa -out key.pem
+openssl req -new -key key.pem -out csr.pem
+openssl x509 -req -days 9999 -in csr.pem -signkey key.pem -out cert.pem
+rm csr.pem
 ```
 
 Running locally in HTTPS
 
 ```
-    npm run startDevs
+npm run startDevs
 ```
 
 The certificates has to be generated in the backend folder.
+
+:warning: **Note:** For test purpose only.
+Open it on your web browser type https://127.0.0.1:3004 and accept the self signed certificate.
+
+<img src="../doc/sslerror.png" alt="ssl error" />
 
 ## [Return to the frontend deployment](../frontend/README.md)
 

@@ -41,6 +41,9 @@ To discover the external IP address of your transwrap server you can run:
 :warning: **Note:** For test purpose only.
 Open it on your web browser add https:// in front of your domain and accept the self signed certificate.
 
+<img src="../doc/sslerror.png" alt="ssl error" />
+
+
 ## Cleanup - (Optional): Cleanup, removing the provisioned AWS resources. 
 
 For removing the Transwrap proxy server, you can use the bash script uninstall_ivs_backend.
