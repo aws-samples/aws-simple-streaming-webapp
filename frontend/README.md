@@ -68,7 +68,7 @@ It should load the authentication page. Now you can create your first account an
 ### Start the server in a local environment: localhost
 
 ```sh
-cd ../backend/
+cd backend/
 npm install
 npm run startDev
 ```
