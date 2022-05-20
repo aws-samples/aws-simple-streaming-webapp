@@ -25,7 +25,7 @@ This is a serverless application, leveraging [Amazon IVS](https://aws.amazon.com
 We will need to deploy the API's, Lambda Functions and Authentication resources, we will use AWS Amplify.
 
 ### :rocket: [2. Deployment of the Proxy AWS Fargate and web App Publish](/backend/README.md)
-This is an optional step to provisione a ECS Docker Container to work a remote transwrap proxy, that will translate from WebRTC to RTMPS.
+This is an **optional step** to provisione a ECS Docker Container to work a remote transwrap proxy, that will translate from WebRTC to RTMPS.
 
 ## Simplifying live streaming contribution - run locally.
 This sample demo app, captures the video and use a proxy in node.js to transwrap the stream to  Amazon IVS
