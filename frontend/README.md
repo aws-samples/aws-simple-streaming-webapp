@@ -72,6 +72,8 @@ cd backend/
 npm install
 npm run startDev
 ```
+**Note:** if you are running locally in HTTPS, the socket needs to be HTTPS as well, [please follow this instruction instead.](../backend/README_HTTPS.md)
+
 ### Test your streaming directly from your browser
 
 <img src="../doc/app01.png" alt="Application" />

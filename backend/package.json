@@ -13,7 +13,8 @@
   "scripts": {
     "start": "node transwrap_https.js",
     "start-test": "node transwrap_http.js",
-    "startDev": "nodemon transwrap_http.js"
+    "startDev": "nodemon transwrap_http.js",
+    "startDevs": "nodemon transwrap_https.js"
   },
   "author": "osmarb marlonpc",
   "license": "MIT"
