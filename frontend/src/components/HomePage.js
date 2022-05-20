@@ -23,26 +23,33 @@ export default function HomePage(props) {
   useEffect(() => {
     (async function () {
       if (!wrapServers) {
-        let apiName = "saveIVSparam";
-        let path = `/getServers/`;
-        await API.get(apiName, path)
-          .then((response) => {
+        try {
+          let apiName = "saveIVSparam";
+          let path = `/getServers/`;
+          await API.get(apiName, path).then((response) => {
             if (response.Items.length === 0) {
               console.err("Server is not defined");
             } else {
               console.log("Remote server is:", response.Items[0].dns);
               setWrapServers(response.Items[0].dns);
             }
-          })
-          .catch((error) => {
-            console.log(error);
           });
+        } catch (error) {
+          console.log(error);
+          handleError(error);
+        }
       } else console.log("Remote server is, cached:", wrapServers);
     })();
   }, [streaming]);
 
+  function handleError(e) {
+    console.log("The server request returned null", e);
+    console.log("Assuming localhost");
+    console.log("localhost:3004");
+    setWrapServers("127.0.0.1:3004");
+  }
+
   function handleFormReady(url, key, playurl) {
-    console.log("eeeeee", url, key);
     setStreamParams({ url: url, key: key });
     btnPlayer.addEventListener("click", () => openPlayer(playurl));
   }
@@ -158,7 +165,7 @@ export default function HomePage(props) {
   return wrapServers ? (
     <div className="App">
       <div id="UserMedia" className="container">
-        {streamParams.key && (
+        {streamParams.key ? (
           <div className="stream-container">
             <div className="controls-container">
               <button
@@ -174,6 +181,12 @@ export default function HomePage(props) {
               </button>
             </div>
             <UserMedia onReady={handleCameraReady} streaming={streaming} />
+          </div>
+        ) : (
+          <div className="placeholder-container">
+            <div className="placeholder-content">
+              IVS RTMPS params is not configured yet.
+            </div>
           </div>
         )}
       </div>

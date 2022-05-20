@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 
 import React, { useRef } from "react";
-import VideoPlayer from "./player/";
+import VideoPlayer from "./player/player";
 import "./styles/PlayerView.style.css";
 
 export default function PlayerView() {

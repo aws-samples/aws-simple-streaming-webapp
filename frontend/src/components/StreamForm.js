@@ -11,6 +11,7 @@ export default function StreamForm(props) {
   const [channelType, setChannelType] = useState("");
   const [streamKey, setStreamKey] = useState("");
   const [playURL, setPlayURL] = useState("");
+  const [configured, isConfigured] = useState(null);
   const { onReady } = props;
 
   useEffect(() => {
@@ -20,6 +21,7 @@ export default function StreamForm(props) {
       await API.get(apiName, path)
         .then((ivsparams) => {
           if (ivsparams) {
+            isConfigured(true);
             setChannelType(ivsparams.channelType.S);
             setRtmpURL(ivsparams.rtmpURL.S);
             setStreamKey(ivsparams.streamKey.S);
@@ -28,7 +30,8 @@ export default function StreamForm(props) {
               onReady(
                 ivsparams.rtmpURL.S,
                 ivsparams.streamKey.S,
-                ivsparams.playURL.S
+                ivsparams.playURL.S,
+                configured
               );
           } else {
             isConfigured(false);

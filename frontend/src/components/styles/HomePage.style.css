@@ -61,6 +61,37 @@ body {
   outline: none; 
 }
 
+.placeholder-container{
+  position: relative;
+  left: 0;
+  top: 10px;
+  right: 0;
+  bottom: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  max-width: 800px;
+  margin-bottom: 10px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30);
+}
+
+.placeholder-content {
+  position: relative;
+  flex-shrink: 0;
+  margin: center;
+  word-break: break-all;
+  transition: all 0.15s ease-in-out;
+  animation: fadeIn 0.25s 1;
+  width: 70%;
+  padding: 40px;
+  height: 100px;
+  color: #4a4a4a;
+  color: #4a4a4a;
+  font-family: monospace;
+  font-size:large;
+}
+
 .debug-container {
   padding-top: 10px;
   position: relative;
