@@ -40,9 +40,9 @@ For improving browser compatibility, the video element was embedded in a canvas 
 [Deploy the application API's and run the client app locally](/frontend/README.md)
 
 ## Additional guides in this repository
-* [*Backend: Transwraping Amazon ECS container:*](/backend/README.md)Install  the remote video transwrap server.
-* [*Create a IVS Channel using a shell script*](/backend/CREATEIVS.md)
-* [*Customize the web app and compatibility discussions*](frontend/BROWSER.md)
+* [**Backend: Transwraping Amazon ECS container:**](/backend/README.md)Install  the remote video transwrap server.
+* [**Create a IVS Channel using a shell script**](/backend/CREATEIVS.md)
+* [**Customize the web app and compatibility discussions**](frontend/BROWSER.md)
 
 ## Notice
 This project uses FFMPG, http://www.ffmpeg.org, please check lisensing usage.
