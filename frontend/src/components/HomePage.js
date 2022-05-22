@@ -54,7 +54,7 @@ export default function HomePage(props) {
     btnPlayer.addEventListener("click", () => openPlayer(playurl));
     const btnSave = document.querySelector("#btnsave");
     btnSave.addEventListener("click", (e) => {
-      e.preventDefault;
+      e.preventDefault();
       btnSave.classList.add("saved");
       setConfigured(true);
       addDebugLine(Date.now(), `Stream Params Saved, ready to stream`);
