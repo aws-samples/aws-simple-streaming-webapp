@@ -26,7 +26,7 @@ The backend deployment is built using a bash shell script located under aws-simp
 
 ```sh
     cd simple-streaming-webapp/backend
-    ./install_ivs_backend.sh (https://github.com/osmarbento-AWS/simple-streaming-webapp/blob/withHooks/backend/install_ivs_backend.sh) deploy all
+    ./install_ivs_backend.sh deploy all
 ```
 
 ## HTTPS considerations
@@ -47,4 +47,8 @@ Open it on your web browser add https:// in front of your domain and accept the 
 ## Cleanup - (Optional): Cleanup, removing the provisioned AWS resources. 
 
 For removing the Transwrap proxy server, you can use the bash script uninstall_ivs_backend.
+
+```sh
+./uninstall_ivs_backend.sh clean all
+```
 
