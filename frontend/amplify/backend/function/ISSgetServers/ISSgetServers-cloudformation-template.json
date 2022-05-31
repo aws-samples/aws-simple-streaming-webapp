@@ -1,13 +1,19 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Lambda Function resource stack creation using Amplify CLI",
+  "Description": "{\"createdOn\":\"Mac\",\"createdBy\":\"Amplify\",\"createdWith\":\"8.3.1\",\"stackType\":\"function-Lambda\",\"metadata\":{}}",
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
       "Default": "NONE",
       "Description": " Schedule Expression"
     },
+    "deploymentBucketName": {
+      "Type": "String"
+    },
     "env": {
+      "Type": "String"
+    },
+    "s3Key": {
       "Type": "String"
     },
     "storageISStaskdnstrackName": {
@@ -17,12 +23,6 @@
     "storageISStaskdnstrackArn": {
       "Type": "String",
       "Default": "storageISStaskdnstrackArn"
-    },
-    "deploymentBucketName": {
-      "Type": "String"
-    },
-    "s3Key": {
-      "Type": "String"
     }
   },
   "Conditions": {
@@ -43,6 +43,14 @@
         "aws:asset:property": "Code"
       },
       "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "deploymentBucketName"
+          },
+          "S3Key": {
+            "Ref": "s3Key"
+          }
+        },
         "Handler": "index.handler",
         "FunctionName": {
           "Fn::If": [
@@ -78,17 +86,9 @@
             "Arn"
           ]
         },
-        "Runtime": "nodejs12.x",
+        "Runtime": "nodejs14.x",
         "Layers": [],
-        "Timeout": "25",
-        "Code": {
-          "S3Bucket": {
-            "Ref": "deploymentBucketName"
-          },
-          "S3Key": {
-            "Ref": "s3Key"
-          }
-        }
+        "Timeout": 25
       }
     },
     "LambdaExecutionRole": {
@@ -97,12 +97,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "simplewebstreamingLambdaRole228fbef6",
+            "simplewebstreamingLambdaRole1b3066e3",
             {
               "Fn::Join": [
                 "",
                 [
-                  "simplewebstreamingLambdaRole228fbef6",
+                  "simplewebstreamingLambdaRole1b3066e3",
                   "-",
                   {
                     "Ref": "env"
@@ -196,14 +196,6 @@
                   ]
                 }
               ]
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "cloudfront:CreateDistributionWithTags",
-                "cloudfront:CreateDistribution"
-              ],
-              "Resource": "*"
             }
           ]
         }

@@ -52,3 +52,10 @@ For removing the Transwrap proxy server, you can use the bash script uninstall_i
 ./uninstall_ivs_backend.sh clean all
 ```
 
+After it completes, you can clean files
+
+```sh
+./uninstall_ivs_backend.sh clean files
+```
+
+

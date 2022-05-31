@@ -1,28 +1,4 @@
 {
-  "hosting": {
-    "S3AndCloudFront": {
-      "service": "S3AndCloudFront",
-      "providerPlugin": "awscloudformation"
-    }
-  },
-  "auth": {
-    "simplewebstreaming5fec9bae": {
-      "service": "Cognito",
-      "providerPlugin": "awscloudformation",
-      "dependsOn": [],
-      "customAuth": false
-    }
-  },
-  "storage": {
-    "IVSparam": {
-      "service": "DynamoDB",
-      "providerPlugin": "awscloudformation"
-    },
-    "ISStaskdnstrack": {
-      "service": "DynamoDB",
-      "providerPlugin": "awscloudformation"
-    }
-  },
   "function": {
     "saveIVSparam": {
       "build": true,
@@ -63,6 +39,44 @@
       ]
     }
   },
+  "auth": {
+    "simplewebstreaming178ae288": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false,
+      "frontendAuthConfig": {
+        "socialProviders": [],
+        "usernameAttributes": [
+          "EMAIL"
+        ],
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": []
+        },
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      }
+    }
+  },
+  "storage": {
+    "IVSparam": {
+      "service": "DynamoDB",
+      "providerPlugin": "awscloudformation"
+    },
+    "ISStaskdnstrack": {
+      "service": "DynamoDB",
+      "providerPlugin": "awscloudformation"
+    }
+  },
   "api": {
     "saveIVSparam": {
       "service": "API Gateway",
@@ -86,6 +100,5 @@
         }
       ]
     }
-  },
-  "custom": {}
+  }
 }

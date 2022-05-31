@@ -1,25 +1,27 @@
 export type AmplifyDependentResourcesAttributes = {
-    "hosting": {
-        "S3AndCloudFront": {
+    "function": {
+        "saveIVSparam": {
+            "Name": "string",
+            "Arn": "string",
             "Region": "string",
-            "HostingBucketName": "string",
-            "WebsiteURL": "string",
-            "S3BucketSecureURL": "string",
-            "CloudFrontDistributionID": "string",
-            "CloudFrontDomainName": "string",
-            "CloudFrontSecureURL": "string",
-            "CloudFrontOriginAccessIdentity": "string"
+            "LambdaExecutionRole": "string"
+        },
+        "ISSgetServers": {
+            "Name": "string",
+            "Arn": "string",
+            "Region": "string",
+            "LambdaExecutionRole": "string"
         }
     },
     "auth": {
-        "simplewebstreaming5fec9bae": {
+        "simplewebstreaming178ae288": {
             "IdentityPoolId": "string",
             "IdentityPoolName": "string",
             "UserPoolId": "string",
+            "UserPoolArn": "string",
             "UserPoolName": "string",
             "AppClientIDWeb": "string",
-            "AppClientID": "string",
-            "AppClientSecret": "string"
+            "AppClientID": "string"
         }
     },
     "storage": {
@@ -38,20 +40,6 @@ export type AmplifyDependentResourcesAttributes = {
             "PartitionKeyName": "string",
             "PartitionKeyType": "string",
             "Region": "string"
-        }
-    },
-    "function": {
-        "saveIVSparam": {
-            "Name": "string",
-            "Arn": "string",
-            "Region": "string",
-            "LambdaExecutionRole": "string"
-        },
-        "ISSgetServers": {
-            "Name": "string",
-            "Arn": "string",
-            "Region": "string",
-            "LambdaExecutionRole": "string"
         }
     },
     "api": {

@@ -1,0 +1,10 @@
+{
+  "resourceName": "IVSparam",
+  "tableName": "IVSparam",
+  "partitionKey": {
+    "fieldName": "username",
+    "fieldType": "string"
+  },
+  "gsi": [],
+  "triggerFunctions": []
+}

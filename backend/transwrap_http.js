@@ -55,39 +55,82 @@ wsRef.on("connection", (ws, req) => {
     console.log("ERROR on websocket", err);
   });
 
-  const rtmpURL = req.url.slice(7);
-  console.log(`URL seted is ${rtmpURL}`);
+  const codec = req.url.split("/")[2];
+  console.log("CODEC", codec);
+
+  if (codec === "h264") {
+    const rtmpURL = req.url.slice(12);
+    console.log(`URL seted is ${rtmpURL}`);
+
+    console.log("No video transcoding");
+    var ffArr = [
+      "-i",
+      "-",
+      "-vcodec",
+      "copy",
+      "-preset",
+      "veryfast",
+      "-tune",
+      "zerolatency",
+      "-acodec",
+      "aac",
+      "-ar",
+      "44100",
+      "-b:a",
+      "128k",
+      "-f",
+      "flv",
+      rtmpURL,
+      "-reconnect",
+      "3",
+      "-reconnect_at_eof",
+      "1",
+      "-reconnect_streamed",
+      "3",
+    ];
+  } else {
+    console.log("Transcoding true");
+    const rtmpURL = req.url.slice(16);
+    console.log(`URL seted is ${rtmpURL}`);
+    var ffArr = [
+      "-fflags",
+      "+genpts",
+      "-i",
+      "-",
+      "-c:v",
+      "libx264",
+      "-r",
+      "25",
+      "-c:a",
+      "aac",
+      "-b:a",
+      "128k",
+      "-ac",
+      "2",
+      "-ar",
+      "44100",
+      "-vf",
+      "scale=1280:720,format=yuv420p",
+      "-profile:v",
+      "main",
+      "-f",
+      "flv",
+      rtmpURL,
+      "-reconnect",
+      "3",
+      "-reconnect_at_eof",
+      "1",
+      "-reconnect_streamed",
+      "3",
+    ];
+  }
 
   ws.on("close", (evt) => {
     ffmpeg.kill("SIGINT");
     console.log(`Connection Closed: ${evt}`);
   });
 
-  const ffmpeg = callff.spawn("ffmpeg", [
-    "-i",
-    "-",
-    "-c:v",
-    "libx264",
-    "-preset",
-    "veryfast",
-    "-tune",
-    "zerolatency",
-    "-acodec",
-    "aac",
-    "-ar",
-    "44100",
-    "-b:a",
-    "128k",
-    "-reconnect",
-    "3",
-    "-reconnect_at_eof",
-    "1",
-    "-reconnect_streamed",
-    "3",
-    "-f",
-    "flv",
-    rtmpURL,
-  ]);
+  const ffmpeg = callff.spawn("ffmpeg", ffArr);
 
   ffmpeg.on("close", (code, signal) => {
     console.log(`FFMPEG closed, reason ${code} , ${signal}`);

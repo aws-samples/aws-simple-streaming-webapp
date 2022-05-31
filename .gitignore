@@ -5,8 +5,11 @@
 /amplify
 /frontend/node_modules
 /backend/node_modules
+/backend/temp_files
+/backend/json_configs
 /.pnp
 .pnp.js
+.pem
 
 # testing
 /coverage
@@ -62,3 +65,7 @@ yarn-error.log*
 frontend/package-lock.json
 backend/package-lock.json
 frontend/stats.json
+backend/cert.pem
+backend/key.pem
+backend/lambda.zip
+backend/docker_files/docker.zip

@@ -32,6 +32,10 @@ export default function HomePage(props) {
             } else {
               console.log("Remote server is:", response.Items[0].dns);
               setWrapServers(response.Items[0].dns);
+              addDebugLine(
+                Date.now(),
+                `Remote server has been defined, using ${response.Items[0].dns}`
+              );
             }
           });
         } catch (error) {
@@ -47,6 +51,10 @@ export default function HomePage(props) {
     console.log("Assuming localhost");
     console.log("localhost:3004");
     setWrapServers("127.0.0.1:3004");
+    addDebugLine(
+      Date.now(),
+      `No Remote server has been registered, assuming localhost:3004`
+    );
   }
 
   function handleFormReady(url, key, playurl) {
@@ -67,8 +75,20 @@ export default function HomePage(props) {
   }
 
   async function handleCameraReady(video, canvasVideo, audio) {
-    canvasRef.current = canvasVideo;
+    if (!testBrowserSupport()) {
+      console.log(
+        "Browser does not support HTMLMediaElement.prototype.captureStream;"
+      );
+      canvasRef.current = canvasVideo;
+    } else {
+      console.log("Browser support Ok!, using video element");
+      canvasRef.current = video;
+    }
     audioRef.current = audio;
+  }
+
+  function testBrowserSupport() {
+    return "function" === typeof HTMLMediaElement.prototype.captureStream;
   }
 
   async function startStream(e) {
@@ -92,16 +112,39 @@ export default function HomePage(props) {
       });
     });
 
-    mediaRecorder.current = new MediaRecorder(outputStream, {
-      mimeType: "video/webm;codecs=h264", // attempt to improve cross browser / platform support with h264
-      videoBitsPerSecond: 3000000,
-    });
+    let options = getmimeType();
+    console.log("mimeType is", options);
+
+    mediaRecorder.current = new MediaRecorder(outputStream, options);
 
     mediaRecorder.current.addEventListener("dataavailable", (e) => {
       console.log("Stream data!!!", e);
       wsRef.current.send(e.data);
     });
     mediaRecorder.current.start(1000);
+  }
+
+  function getmimeType() {
+    let options = {
+      mimeType: "video/webm;codecs=h264",
+      videoBitsPerSecond: 3000000,
+    };
+
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+      addDebugLine(Date.now(), `${options.mimeType} +  is not Supported`);
+      options = {
+        mimeType: "video/webm;codes=vp8,opus",
+        videoBitsPerSecond: 3000000,
+      };
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        addDebugLine(Date.now(), `${options.mimeType} +  is not Supported`);
+        options = {
+          mimeType: "video/mp4;codecs=avc1,mp4a",
+          videoBitsPerSecond: 3000000,
+        };
+      }
+    }
+    return options;
   }
 
   function stopStreaming(e) {
@@ -111,13 +154,16 @@ export default function HomePage(props) {
 
   async function socketConnect(server, rtmpURL, streamKey) {
     console.log("socketConnect");
+    let options = getmimeType();
+    let codec = options.mimeType.split("=", 2)[1];
+    console.log("??", codec);
     if (window.location.protocol == "http:") {
       let protocol = window.location.protocol.replace("http", "ws");
       let testServer = "127.0.0.1:3004";
-      var wsUrl = `${protocol}//${testServer}/rtmps/${rtmpURL}${streamKey}`; // if you want to stream to a remote server, change here to server instead of test server
+      var wsUrl = `${protocol}//${testServer}/rtmps/${codec}/${rtmpURL}${streamKey}`; // if you want to stream to a remote server, change here to server instead of test server
     } else {
       let protocol = window.location.protocol.replace("https", "wss");
-      var wsUrl = `${protocol}//${server}/rtmps/${rtmpURL}${streamKey}`;
+      var wsUrl = `${protocol}//${server}/rtmps/${codec}/${rtmpURL}${streamKey}`;
     }
     console.log("URL", wsUrl);
     wsRef.current = new WebSocket(wsUrl);

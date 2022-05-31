@@ -1,3 +1,0 @@
-{
-    "bucketName": { "Fn::Sub" :"aws-simplewebstreaming-hostingbucket-${AWS::AccountId}"}
-}

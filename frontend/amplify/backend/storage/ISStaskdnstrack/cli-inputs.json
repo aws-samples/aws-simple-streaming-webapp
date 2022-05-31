@@ -1,0 +1,10 @@
+{
+  "resourceName": "ISStaskdnstrack",
+  "tableName": "ISS-task-dns-track",
+  "partitionKey": {
+    "fieldName": "role",
+    "fieldType": "string"
+  },
+  "gsi": [],
+  "triggerFunctions": []
+}
