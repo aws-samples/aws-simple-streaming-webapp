@@ -53,35 +53,96 @@ wsRef.on("connection", (ws, req) => {
     console.log("ERROR on websocket", err);
   });
 
-  const rtmpURL = req.url.slice(7);
+  const rtmpURL = req.url.slice(12);
   console.log(`URL seted is ${rtmpURL}`);
+
+  const codec = req.url.split("/")[2];
+  console.log("CODEC", codec);
+
+  if (codec === "h264") {
+    console.log("No video transcoding");
+    var ffArr = [
+      "-i",
+      "-",
+      "-vcodec",
+      "copy",
+      "-preset",
+      "veryfast",
+      "-tune",
+      "zerolatency",
+      "-acodec",
+      "aac",
+      "-ar",
+      "44100",
+      "-b:a",
+      "128k",
+      "-f",
+      "flv",
+      rtmpURL,
+      "-reconnect",
+      "3",
+      "-reconnect_at_eof",
+      "1",
+      "-reconnect_streamed",
+      "3",
+    ];
+  } else {
+    console.log("Transcoding true");
+    //ffmpeg -re -stream_loop -1 -i $VIDEO_FILEPATH -r 30 -c:v libx264 -pix_fmt yuv420p -profile:v main -preset veryfast -x264opts "nal-hrd=cbr:no-scenecut" -minrate 3000 -maxrate 3000 -g 60 -c:a aac -b:a 160k -ac 2 -ar 44100 -f flv rtmps://$INGEST_ENDPOINT:443/app/$STREAM_KEY
+
+    var ffArr = [
+      "-fflags",
+      "+genpts",
+      "-i",
+      "-",
+      "-r",
+      "30",
+      "-c:v",
+      "libx264",
+      "-pix_fmt",
+      "yuv420p",
+      "-profile:v",
+      "main",
+      "-preset",
+      "veryfast",
+      "-x264opts",
+      "nal-hrd=cbr:no-scenecut",
+      "-minrate",
+      "3000",
+      "-maxrate",
+      "3000",
+      "-g",
+      "60",
+      "-c:a",
+      "aac",
+      "-b:a",
+      "128k",
+      "-ac",
+      "2",
+      "-ar",
+      "44100",
+      "-vf",
+      "scale=1280:720,format=yuv420p",
+      "-profile:v",
+      "main",
+      "-f",
+      "flv",
+      rtmpURL,
+      "-reconnect",
+      "3",
+      "-reconnect_at_eof",
+      "1",
+      "-reconnect_streamed",
+      "3",
+    ];
+  }
 
   ws.on("close", (evt) => {
     ffmpeg.kill("SIGINT");
     console.log(`Connection Closed: ${evt}`);
   });
 
-  const ffmpeg = callff.spawn("ffmpeg", [
-    "-i",
-    "-",
-    "-vcodec",
-    "copy",
-    "-preset",
-    "veryfast",
-    "-tune",
-    "zerolatency",
-    "-acodec",
-    "aac",
-    "-reconnect",
-    "3",
-    "-reconnect_at_eof",
-    "1",
-    "-reconnect_streamed",
-    "3",
-    "-f",
-    "flv",
-    rtmpURL,
-  ]);
+  const ffmpeg = callff.spawn("ffmpeg", ffArr);
 
   ffmpeg.on("close", (code, signal) => {
     console.log(`FFMPEG closed, reason ${code} , ${signal}`);

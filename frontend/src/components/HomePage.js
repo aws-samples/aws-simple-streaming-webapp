@@ -129,6 +129,7 @@ export default function HomePage(props) {
       mimeType: "video/webm;codecs=h264",
       videoBitsPerSecond: 3000000,
     };
+    options.codec = "h264";
 
     if (!MediaRecorder.isTypeSupported(options.mimeType)) {
       addDebugLine(Date.now(), `${options.mimeType} +  is not Supported`);
@@ -136,12 +137,15 @@ export default function HomePage(props) {
         mimeType: "video/webm;codes=vp8,opus",
         videoBitsPerSecond: 3000000,
       };
+      options.codec = "vp8o";
+
       if (!MediaRecorder.isTypeSupported(options.mimeType)) {
         addDebugLine(Date.now(), `${options.mimeType} +  is not Supported`);
         options = {
           mimeType: "video/mp4;codecs=avc1,mp4a",
           videoBitsPerSecond: 3000000,
         };
+        options.codec = "mp4a";
       }
     }
     return options;
@@ -155,12 +159,12 @@ export default function HomePage(props) {
   async function socketConnect(server, rtmpURL, streamKey) {
     console.log("socketConnect");
     let options = getmimeType();
-    let codec = options.mimeType.split("=", 2)[1];
+    let codec = options.codec;
     console.log("??", codec);
     if (window.location.protocol == "http:") {
       let protocol = window.location.protocol.replace("http", "ws");
       let testServer = "127.0.0.1:3004";
-      var wsUrl = `${protocol}//${testServer}/rtmps/${codec}/${rtmpURL}${streamKey}`; // if you want to stream to a remote server, change here to server instead of test server
+      var wsUrl = `${protocol}//${server}/rtmps/${codec}/${rtmpURL}${streamKey}`; // if you want to force streaming to a local server change to use testServer, instead of server
     } else {
       let protocol = window.location.protocol.replace("https", "wss");
       var wsUrl = `${protocol}//${server}/rtmps/${codec}/${rtmpURL}${streamKey}`;

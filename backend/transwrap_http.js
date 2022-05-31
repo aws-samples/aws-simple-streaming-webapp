@@ -55,13 +55,13 @@ wsRef.on("connection", (ws, req) => {
     console.log("ERROR on websocket", err);
   });
 
+  const rtmpURL = req.url.slice(12);
+  console.log(`URL seted is ${rtmpURL}`);
+
   const codec = req.url.split("/")[2];
   console.log("CODEC", codec);
 
   if (codec === "h264") {
-    const rtmpURL = req.url.slice(12);
-    console.log(`URL seted is ${rtmpURL}`);
-
     console.log("No video transcoding");
     var ffArr = [
       "-i",
@@ -90,17 +90,31 @@ wsRef.on("connection", (ws, req) => {
     ];
   } else {
     console.log("Transcoding true");
-    const rtmpURL = req.url.slice(16);
-    console.log(`URL seted is ${rtmpURL}`);
+    //ffmpeg -re -stream_loop -1 -i $VIDEO_FILEPATH -r 30 -c:v libx264 -pix_fmt yuv420p -profile:v main -preset veryfast -x264opts "nal-hrd=cbr:no-scenecut" -minrate 3000 -maxrate 3000 -g 60 -c:a aac -b:a 160k -ac 2 -ar 44100 -f flv rtmps://$INGEST_ENDPOINT:443/app/$STREAM_KEY
+
     var ffArr = [
       "-fflags",
       "+genpts",
       "-i",
       "-",
+      "-r",
+      "30",
       "-c:v",
       "libx264",
-      "-r",
-      "25",
+      "-pix_fmt",
+      "yuv420p",
+      "-profile:v",
+      "main",
+      "-preset",
+      "veryfast",
+      "-x264opts",
+      "nal-hrd=cbr:no-scenecut",
+      "-minrate",
+      "3000",
+      "-maxrate",
+      "3000",
+      "-g",
+      "60",
       "-c:a",
       "aac",
       "-b:a",
